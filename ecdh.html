@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>ECDH-AES Crypto</title>
+    <style>
+      html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+      body{margin:0}
+      a{background:0 0}
+      a:active,a:hover{outline:0}
+      img{border:0}
+      input,textarea{color:inherit;font:inherit;margin:0}
+      input::-moz-focus-inner{border:0;padding:0}
+      input{line-height:normal}
+      textarea{overflow:auto}
+      *{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+      body,html{height:100%;color:#333}
+      body{font-family:Helvetica,Arial,sans-serif}
+      input,textarea{border-radius:3px;border:1px solid #ddd;-webkit-appearance:none;padding:8px}
+      a{color:#4a8a4e}
+      img{width:100%}
+      ::-webkit-input-placeholder{color:#aaa}
+      ::-moz-placeholder{color:#aaa}
+      :-ms-input-placeholder{color:#aaa}
+      ::placeholder{color:#aaa}
+      h1,h2,h3,h4{margin:2em 0 1em}
+      h1{font-size:1.7em;margin-top:1.2em}
+      h2{font-size:1.5em}
+      h3{font-size:1.2em}
+      h4{font-size:1em}
+      .has-noTopMargin{margin-top:0}
+      .is-textRightAligned{text-align:right}
+      .layout-outer{height:100%;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column}
+      .EmbedContainer{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%}
+      .EmbedContainer embed,.EmbedContainer iframe,.EmbedContainer object{position:absolute;top:0;left:0;width:100%;height:100%}
+      .Navbar{color:#fff;background-color:#6fd274;padding:8px;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-ms-flex-align:center;align-items:center;min-height:53px}
+      .Navbar-child{width:33.333%;display:inline-block;vertical-align:top}
+      .Navbar-logoLink{display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-align-items:center;-ms-flex-align:center;align-items:center;text-align:center}
+      .Navbar-logo{width:20px}
+      .Navbar-button{color:#fff;text-decoration:none;padding:8px 0}
+      .BackButtonImage{width:10px;height:1em}
+      .Content{-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;padding:8px}
+      .MessageField{-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;min-height:100px;width:100%}
+      .PasswordGroup{display:-webkit-flex;display:-ms-flexbox;display:flex;padding-bottom:8px;min-height:40px}
+      .PasswordField{-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;min-width:70%}
+      .HelpLink{display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-ms-flex-align:center;align-items:center;margin-left:8px;vertical-align:bottom}
+      .HelpLink-image{width:30px}
+      .Help{-webkit-align-self:center;-ms-flex-item-align:center;align-self:center;padding:8px;max-width:600px;text-align:center;line-height:1.3;margin:0 auto}
+      .Help-logo{max-width:180px}
+      .Help-drawing,.Help-server-photo{max-width:400px}
+      .Review+.Review{margin-top:3em}
+      .Review-header{margin:0}
+      .Review-body{margin-top:0}
+      .Review-stars{color:#ff9500;font-size:1.2em}
+      .Review-by{margin:0}
+      html{
+    width:100%;
+    height:100%;
+}
+    body{width:100%;margin:auto;min-width:600px;max-width:1000px}
+    </style>
+
+    <script type="text/javascript">
+const fromBase64 = base64String => Uint8Array.from(atob(base64String), c => c.charCodeAt(0))
+
+var randomString = function(length) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for(var i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
+
+function inputContainCipherText() {
+  
+  var cipherText = document.getElementById("resultGCM").value.trim()
+
+  var result = false
+  var arr = cipherText.split(/\s+/);
+  var index = 0
+  let pattern = /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
+
+  for ( let i = 0; i < arr.length; i++) {
+     let ele = arr[i]
+
+     let match_result = ele.match(pattern);
+     if (match_result) {
+            result = true;
+	    break
+
+     }
+  }
+  return result
+}
+
+async function decrypt() {
+  //var clearText = fromBase64(document.getElementById("plainTextGCM").value)
+  var cipherText = document.getElementById("resultGCM").value.trim()
+ 
+  var result = ""
+  var arr = cipherText.split(/\s+/);
+  var index = 0
+  let pattern = /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
+  
+  for ( let i = 0; i < arr.length; i++) {
+     let ele = arr[i]
+     
+     let match_result = ele.match(pattern);
+     if (match_result) {
+	     var combined = fromBase64(ele);
+
+  //let combined = fromBase64("794O6abpEDLfKZtsr+l2OWY0vyU4BWbODHCBr9OsDY/3OGY8ouXp0Y220bIh")
+  var privateKey = fromBase64("kydfwxVUBwLfVEu2+wY2e8eF7lujosqEQqnn8uN9bjM=")
+  let privateKey_input = document.getElementById("encryptKey").value;
+  if (privateKey_input && privateKey_input.length) {
+          privateKey = fromBase64(privateKey_input);
+  }
+
+  let nonce = combined.slice(0, 12)
+  let tag = combined.slice(-16)
+  let cipher = combined.slice(12, -16)
+
+  var key = await window.crypto.subtle.importKey("raw",
+    privateKey,
+    { name: "AES-GCM" },
+    true,
+    ["decrypt", "encrypt"])
+
+  try {
+    var decrypted = await window.crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: nonce,
+      },
+      key,
+      _append2Buffer(cipher, tag))
+    let result0 = new TextDecoder().decode(decrypted)
+    console.log(result0)
+    if (i === 0) {
+      result = result0
+    } else {
+      result = result + " " + result0
+    }
+  } catch(e) {
+        if (i === 0) {
+      result = e
+    } else {
+      result = result + " " + e
+    }
+
+  }
+
+	  //return
+  } else {
+	     if (i === 0) {
+      result = ele
+    } else {
+      result = result + " " + ele
+    }
+
+     }
+  
+
+  }
+
+  add_log(result)
+
+ // let match_result = cipherText.match(pattern)
+  //if match_result {
+  //} else {
+    // return
+  //}
+
+}
+
+async function encrypt() {
+  var clearText = document.getElementById("resultGCM").value
+  //var combined = fromBase64(document.getElementById("cipherTextGCM").value)
+  let combined = fromBase64("794O6abpEDLfKZtsr+l2OWY0vyU4BWbODHCBr9OsDY/3OGY8ouXp0Y220bIh")
+  var privateKey = fromBase64("kydfwxVUBwLfVEu2+wY2e8eF7lujosqEQqnn8uN9bjM=")
+  let privateKey_input = document.getElementById("encryptKey").value;
+  if (privateKey_input && privateKey_input.length) {
+	  privateKey = fromBase64(privateKey_input)
+  }
+
+  //let nonce = combined.slice(0, 12)
+  let tag = combined.slice(-16)
+  let cipher = combined.slice(12, -16)
+
+  var nonce_str = randomString(12)
+  var nonce = asciiToUint8Array(nonce_str) 
+  var key = await window.crypto.subtle.importKey("raw",
+    privateKey,
+    { name: "AES-GCM" },
+    true,
+    ["decrypt", "encrypt"])
+
+  
+  try {
+
+   var encrypted = await window.crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv: nonce,
+      },
+      key,
+      new TextEncoder().encode(clearText)
+    )
+    combinedEncrypted = _append2Buffer(nonce, encrypted)
+ 
+    // Encrypted version
+    //add_log_enc(_arrayBufferToBase64(combinedEncrypted))
+    add_log(_arrayBufferToBase64(combinedEncrypted))
+
+  } catch(e) {
+    add_log_enc(e)
+  }
+  
+}
+
+/*
+ * -----------------------------------------------------------------------
+ */
+
+// Add logs
+function add_log(text) {
+  document.getElementById("resultGCM").value = text;
+  console.log(text)
+}
+
+
+function _arrayBufferToBase64(buffer) {
+  var binary = '';
+  var bytes = new Uint8Array( buffer );
+  var len = bytes.byteLength;
+  for (var i = 0; i < len; i++) {
+    binary += String.fromCharCode( bytes[ i ] );
+  }
+  return window.btoa(binary);
+}
+
+function _append2Buffer(buffer1, buffer2) {
+  var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength)
+  tmp.set(new Uint8Array(buffer1), 0)
+  tmp.set(new Uint8Array(buffer2), buffer1.byteLength)
+  return tmp.buffer;
+}
+
+function asciiToUint8Array(str)
+{
+    var chars = [];
+    for (var i = 0; i < str.length; ++i)
+        chars.push(str.charCodeAt(i));
+    return new Uint8Array(chars);
+}
+
+ function copyResultText() {
+  /* Get the text field */
+  var copyText = document.getElementById("resultGCM");
+  /* Select the text field */
+  //copyText.select();
+  //copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+  /* Copy the text inside the text field */
+  navigator.clipboard.writeText(copyText.value)
+  .then(() => {
+     /* Alert the copied text */
+     alert("Result text copied to clipboard, and you can send it to Peer");
+  })
+  .catch(() => {
+       alert("something went wrong");
+   });
+
+}
+
+function copyKey() {
+  /* Get the text field */
+  var copyText = document.getElementById("myPubKey");
+  /* Select the text field */
+  //copyText.select();
+  //copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+  /* Copy the text inside the text field */
+  navigator.clipboard.writeText(copyText.value)
+  .then(() => {
+        /* Alert the copied text */
+        alert("My public key copied to clipboard, and you can send it to Peer");
+   })
+   .catch(() => {
+	   alert("something went wrong");
+    });
+
+}
+function copyPrivKey() {
+  /* Get the text field */
+  var copyText = document.getElementById("myPrivKey");
+  /* Select the text field */
+  //copyText.select();
+  //copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+  /* Copy the text inside the text field */
+  navigator.clipboard.writeText(copyText.value)
+  .then(() => {
+      /* Alert the copied text */
+      alert("My private key copied to clipboard, and you can save it: " + copyText.value);
+   })
+   .catch(() => {
+      alert("something went wrong");
+   });
+}
+
+function exportPrivKey() {
+           var myPubKey = document.getElementById("myPubKey");
+           var myPrivKey = document.getElementById("myPrivKey");
+
+	    var myPrivKey_objs = {"PubKey":myPubKey.value, "PrivKey":myPrivKey.value };
+            downloadObjectAsJson(myPrivKey_objs, "myKeys");
+            //window.localStorage.setItem("PubKey", myPubKey.value);
+	    //window.localStorage.setItem("PrivKey", myPrivKey.value);
+
+
+	    alert("my Keys is to save as name myKeys.json, and you can import it later");
+
+	    }
+
+function copyPrivKeyWithLink() {
+  /* Get the text field */
+  var priv_key = document.getElementById("myPrivKey").value;
+  var clipboard_text = "";
+  if (priv_key === ""){
+	      return;
+	    }
+
+  //var copyText = document.getElementById("resultGCM");
+  /* Select the text field */
+  //copyText.select();
+  //copyText.setSelectionRange(0, 99999); /* For mobile devices */
+  var copyText_value = "";
+  var isCipherContained = inputContainCipherText();
+  if (copyText_value.length == 0) {
+          //use explicit url in case your encryption/decryption web is local
+          let current_url = window.location.href;
+          let search_http = current_url.includes("http")
+          if (search_http) {
+            if (document.getElementById("myPubKey").value === "") {
+              clipboard_text = clipboard_text + current_url.split("?")[0] + "?input=" + encodeURIComponent(copyText_value);
+            } else {
+               clipboard_text = clipboard_text + current_url.split("?")[0] + "?input=" + encodeURIComponent(copyText_value) + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value);
+            }
+          } else {
+
+            if (document.getElementById("myPubKey").value === "") {
+               clipboard_text = clipboard_text + "https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=" + encodeURIComponent(copyText_value);
+            } else {
+               clipboard_text = clipboard_text + "https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=" + encodeURIComponent(copyText_value) + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value);
+            }
+          }
+
+          if (document.getElementById("peerPubKey").value != "") {
+               clipboard_text = clipboard_text + "&myPubKey=" + encodeURIComponent(document.getElementById("peerPubKey").value) 
+            }
+
+          var prompt_text = "This is my secure communication link. Please input your words, click encrypt, click copyWithLink(or click copy for not the first encrypted message), paste it somewhere and send it to me.  ";
+          clipboard_text = priv_key + "\n\n" + prompt_text + clipboard_text;
+	  navigator.clipboard.writeText(clipboard_text)
+          .then(() => {
+	       /* Alert the copied text */
+               alert("Private key with link copied to clipboard, and you can save it for future use");
+          })
+          .catch(() => {
+             alert("something went wrong");
+          });
+
+  }
+}
+
+
+ function copyWithLink() {
+  /* Get the text field */
+  var copyText = document.getElementById("resultGCM");
+  /* Select the text field */
+  //copyText.select();
+  //copyText.setSelectionRange(0, 99999); /* For mobile devices */
+  var peerPubKey = document.getElementById("peerPubKey").value;
+  var myPrivKey = document.getElementById("myPrivKey").value;
+
+
+  var isCipherContained = inputContainCipherText();
+  if (isCipherContained || (copyText.value.length == 0)) {
+	  //use explicit url in case your encryption/decryption web is local
+	  let current_url = window.location.href;
+	  var clipboard_text = "";
+          let search_http = current_url.includes("http")
+          if (search_http) {
+	    if (document.getElementById("myPubKey").value === "") {
+	      clipboard_text = current_url.split("?")[0] + "?input=" + encodeURIComponent(copyText.value);
+	    } else {
+	       clipboard_text = current_url.split("?")[0] + "?input=" + encodeURIComponent(copyText.value) + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value);
+	    }
+          } else {
+
+	    if (document.getElementById("myPubKey").value === "") {
+	       clipboard_text = "https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=" + encodeURIComponent(copyText.value);
+            } else {
+	       clipboard_text = "https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=" + encodeURIComponent(copyText.value) + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value);
+            }
+          }
+
+	  if (document.getElementById("peerPubKey").value != "") {
+	       clipboard_text = clipboard_text + "&myPubKey=" + encodeURIComponent(document.getElementById("peerPubKey").value) 
+	    }
+
+	  navigator.clipboard.writeText(clipboard_text)
+          .then(() => {
+             /* Alert the copied text */
+             if (peerPubKey == "") {
+                alert("My public key with link copied to clipboard, and you can send it to Peer for him to encrypt message and send back to you");
+              } else {
+                alert("My public key and encrypted message with link copied to clipboard, and you can send it to Peer");
+              }
+
+          })
+          .catch(() => {
+             alert("something went wrong");
+          });
+
+
+  } else {
+      alert("You should encrypt first before copyWithLink");
+  }
+}
+
+ function copyWithLink2() {
+  /* Get the text field */
+  var copyText_value = "";
+  /* Select the text field */
+  //copyText.select();
+  //copyText.setSelectionRange(0, 99999); /* For mobile devices */
+  var peerPubKey = document.getElementById("peerPubKey").value;
+  var myPrivKey = document.getElementById("myPrivKey").value;
+
+  var myPubKey = document.getElementById("myPubKey").value;
+
+   //use explicit url in case your encryption/decryption web is local
+   let current_url = window.location.href;
+   var clipboard_text = "";
+   let search_http = current_url.includes("http")
+    if (search_http) {
+            if (document.getElementById("myPubKey").value === "") {
+              clipboard_text = current_url.split("?")[0] + "?input=";
+            } else {
+               clipboard_text = current_url.split("?")[0] + "?input="  + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value);
+            }
+          } else {
+
+            if (document.getElementById("myPubKey").value === "") {
+               clipboard_text = "https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=";
+            } else {
+               clipboard_text = "https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=" + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value);
+            }
+          }
+         /*
+          if (document.getElementById("peerPubKey").value != "") {
+               clipboard_text = clipboard_text + "&myPubKey=" + encodeURIComponent(document.getElementById("peerPubKey").value) 
+            }
+         */
+          if (myPrivKey != "") {
+              var prompt_text = "This is my secure communication link. Please input your words, click encrypt, click copyWithMyPubKey(copy button only work for not the first encrypted message), paste it somewhere and send it to me.  ";
+              clipboard_text = prompt_text + clipboard_text;
+	      navigator.clipboard.writeText(clipboard_text)
+              .then(() => {
+                  alert("My public key with link copied to clipboard, and you can send it to Peer for him to encrypt message and send back to you");
+               })
+               .catch(() => {
+                  alert("something went wrong");
+               });
+
+          } else 
+	 {
+        	 alert("My private key and My public key should not be empty, you can generated it by click importMyKey or clearKeys");
+	 }
+
+}
+
+ function clearAllText() {
+  /* Get the text field */
+  document.getElementById("resultGCM").value = "";
+  setFocus("resultGCM");
+}
+
+function generateKey() {
+  /* Get the text field */
+  var peerPubKey = document.getElementById("peerPubKey").value;
+  if (peerPubKey === "") {
+	  ECDH_DeriveKey_DeriveBits();
+          setFocus("peerPubKey");
+	  
+  } else {
+	  ECDH_DeriveKey_DeriveBits2();
+	  setFocus("resultGCM");
+  }
+}
+function clearKeys() {
+
+  document.getElementById("myPrivKey").value = "";
+  document.getElementById("myPubKey").value = "";
+  document.getElementById("peerPubKey").value = "";
+  document.getElementById("sharedKey").value = "";
+
+  generateKey();
+
+}
+let inputElem = document.querySelector("textarea");
+window.addEventListener('load', function(e) {
+	inputElem.focus();
+})
+
+
+window.onload=function(){
+	function querySt(ji){
+		hu = window.location.search.substring(1)
+		gy = hu.split("&")
+
+		for (i=0;i<gy.length;i++){
+			ft = gy[i].split("=");
+			if (ft[0] === ji) {
+				return ft[1];
+			}
+		}
+		return null
+	}
+
+
+       var uc = querySt("input");
+    if (uc === null) {
+	//document.getElementById("resultGCM").value = "";
+
+    } else {
+	document.getElementById("resultGCM").value = decodeURIComponent(uc);
+    }
+    uc = querySt("peerPubKey");
+    if (uc === null) {
+        //document.getElementById("resultGCM").value = "";
+
+    } else {
+        document.getElementById("peerPubKey").value = decodeURIComponent(uc);
+    }
+
+    uc = querySt("myPubKey");
+    if (uc === null) {
+        //document.getElementById("resultGCM").value = "";
+
+    } else {
+        document.getElementById("myPubKey").value = decodeURIComponent(uc);
+    }
+    
+    let result = document.getElementById("resultGCM").value;
+    let peerPubKey = document.getElementById("peerPubKey").value;
+    let myPrivKey = document.getElementById("myPrivKey").value;
+    let myPubKey = document.getElementById("myPubKey").value;
+
+    
+    if ((result === "")&&(peerPubKey != "")&&(myPubKey === "")){
+	    generateKey();
+	    //ecdhGenerateSharedKey();
+	    //BasicOrAdvance();
+
+	    //ECDH_DeriveKey_DeriveBits2();
+	    //var copyText = document.getElementById("resultGCM");
+            //copyText.select();
+           }
+
+
+	    
+    if ((result === "")&&(peerPubKey === "")&&(myPubKey === "")){
+            generateKey();
+            }
+    if ((myPrivKey === "")&&(myPubKey != "")&&(peerPubKey != "")) {
+	      if (typeof(Storage) !== "undefined") {
+	       let PrivKeyStored = window.localStorage.getItem("PrivKey");
+	       let PubKeyStored = window.localStorage.getItem("PubKey");
+
+              if (PubKeyStored === myPubKey) {
+                  document.getElementById("myPrivKey").value = PrivKeyStored;
+
+                  ecdhGenerateSharedKey();
+                  setFocus("resultGCM"); 
+            }
+
+	    }
+	    }
+     
+
+    //BasicOrAdvance();
+}
+
+function setFocus(id){
+    let ele2SetFocus = document.getElementById(id);
+    ele2SetFocus.select();
+
+
+}
+//////////////////ECDH
+var privateKey;
+    var publicKey;
+
+
+
+    var iv;
+
+    
+    function asciiToUint8Array(str) {
+        var chars = [];
+        for (var i = 0; i < str.length; ++i)
+            chars.push(str.charCodeAt(i));
+        return new Uint8Array(chars);
+    }
+
+ function ECDH_DeriveKey_DeriveBits() {
+
+    var cryptoObj = window.crypto || window.msCrypto;
+
+    if (!cryptoObj) {
+        alert("Crypto API is not supported by the Browser");
+        return;
+    }
+
+    //var plainText = document.getElementById("plainText").value;
+    //var curve = document.getElementById("curve").value;
+    var curve = "P-256";
+    iv = crypto.getRandomValues(new Uint8Array(16));
+
+    window.crypto.subtle.generateKey({
+                name: "ECDH",
+                namedCurve: curve, //can be "P-256", "P-384", or "P-521"
+            },
+            true, //whether the key is extractable (i.e. can be used in exportKey)
+            ["deriveKey", "deriveBits"] //can be any combination of "deriveKey" and "deriveBits"
+        )
+        .then(function(key) {
+
+            publicKey = key.publicKey;
+            privateKey = key.privateKey;
+
+
+            // For Demo Purpos Only Exported in JWK format
+            window.crypto.subtle.exportKey("jwk", key.publicKey).then(
+                function(keydata) {
+                    publicKeyhold = keydata;
+                    publicKeyJson = JSON.stringify(publicKeyhold);
+                    document.getElementById("myPubKey").value = publicKeyJson;
+
+                }
+            );
+
+            window.crypto.subtle.exportKey("jwk", key.privateKey).then(
+                function(keydata) {
+                    privateKeyhold = keydata;
+                    privateKeyJson = JSON.stringify(privateKeyhold);
+                    document.getElementById("myPrivKey").value = privateKeyJson;
+
+	            var myPrivKey_now = document.getElementById("myPrivKey").value;
+
+                    var myPubKey_now = document.getElementById("myPubKey").value;
+
+                    if (typeof(Storage) !== "undefined") {
+                              window.localStorage.setItem("PubKey", myPubKey_now);
+                              window.localStorage.setItem("PrivKey", myPrivKey_now);
+
+                           }
+
+                }
+            );
+
+
+
+        })
+        .catch(function(err) {
+            console.error(err);
+        });
+}
+
+
+
+function ECDH_DeriveKey_DeriveBits2() {
+
+    var cryptoObj = window.crypto || window.msCrypto;
+
+    if (!cryptoObj) {
+        alert("Crypto API is not supported by the Browser");
+        return;
+    }
+
+    //var plainText = document.getElementById("plainText").value;
+    //var curve = document.getElementById("curve").value;
+    var curve = "P-256";
+    iv = crypto.getRandomValues(new Uint8Array(16));
+
+    window.crypto.subtle.generateKey({
+                name: "ECDH",
+                namedCurve: curve, //can be "P-256", "P-384", or "P-521"
+            },
+            true, //whether the key is extractable (i.e. can be used in exportKey)
+            ["deriveKey", "deriveBits"] //can be any combination of "deriveKey" and "deriveBits"
+        )
+        .then(function(key) {
+
+            publicKey = key.publicKey;
+            privateKey = key.privateKey;
+
+
+            // For Demo Purpos Only Exported in JWK format
+            window.crypto.subtle.exportKey("jwk", key.publicKey).then(
+                function(keydata) {
+                    publicKeyhold = keydata;
+                    publicKeyJson = JSON.stringify(publicKeyhold);
+                    document.getElementById("myPubKey").value = publicKeyJson;
+
+                }
+            );
+
+            window.crypto.subtle.exportKey("jwk", key.privateKey).then(
+                function(keydata) {
+                    privateKeyhold = keydata;
+                    privateKeyJson = JSON.stringify(privateKeyhold);
+                    document.getElementById("myPrivKey").value = privateKeyJson;
+		    ecdhGenerateSharedKey();
+                }
+            );
+
+
+
+
+        })
+        .catch(function(err) {
+            console.error(err);
+        });
+}
+
+
+function ecdhGenerateSharedKey() {
+
+    var peerPubKeyUsage = document.getElementById("peerPubKey").value;
+
+    if (peerPubKeyUsage === null || peerPubKeyUsage.trim() === '') {
+        alert("Peer public key should not be empty");
+        return;
+    }
+
+    obj = JSON.parse(peerPubKeyUsage);
+    x1 = obj.x;
+    y1 = obj.y;
+
+
+ var public_key;
+   window.crypto.subtle.importKey(
+    "jwk", //can be "jwk" (public or private), "raw" (public only), "spki" (public only), or "pkcs8" (private only)
+    {   //this is an example jwk key, other key types are Uint8Array objects
+        kty: "EC",
+        crv: "P-256",
+        x: x1,
+        y: y1,
+        ext: true,
+    },
+    {   //these are the algorithm options
+        name: "ECDH",
+        namedCurve: "P-256", //can be "P-256", "P-384", or "P-521"
+    },
+    true, //whether the key is extractable (i.e. can be used in exportKey)
+    [] //"deriveKey" and/or "deriveBits" for private keys only (just put an empty list if importing a public key)
+)
+.then(function(publicKey){
+    //returns a privateKey (or publicKey if you are importing a public key)
+    console.log(publicKey);
+    public_key = publicKey;
+    console.log(public_key);
+})
+.catch(function(err){
+    console.error(err);
+});
+
+var myPrivKeyUsage = document.getElementById("myPrivKey").value;
+if (myPrivKeyUsage === null || myPrivKeyUsage.trim() === '') {
+        alert("My private key should not be empty");
+        return;
+    }
+
+    obj2 = JSON.parse(myPrivKeyUsage);
+    x2 = obj2.x;
+    y2 = obj2.y;
+    d2 = obj2.d
+
+   var private_key;
+   window.crypto.subtle.importKey(
+    "jwk", //can be "jwk" (public or private), "raw" (public only), "spki" (public only), or "pkcs8" (private only)
+    {   //this is an example jwk key, other key types are Uint8Array objects
+        kty: "EC",
+        crv: "P-256",
+        x: x2,
+        y: y2,
+        d: d2,
+        ext: true,
+    },
+    {   //these are the algorithm options
+        name: "ECDH",
+        namedCurve: "P-256", //can be "P-256", "P-384", or "P-521"
+    },
+    true, //whether the key is extractable (i.e. can be used in exportKey)
+    ["deriveKey", "deriveBits"] //"deriveKey" and/or "deriveBits" for private keys only (just put an empty list if importing a public key)
+)
+.then(function(privateKey){
+    //returns a privateKey (or publicKey if you are importing a public key)
+    console.log(privateKey);
+    private_key = privateKey;
+
+    window.crypto.subtle.deriveKey({
+                        name: "ECDH",
+                        namedCurve: "P-256", //can be "P-256", "P-384", or "P-521"
+                        public: public_key, //an ECDH public key from generateKey or importKey
+                    },
+                    private_key, //your ECDH private key from generateKey or importKey
+                    { //the key type you want to create based on the derived bits
+                        name: "AES-GCM", //can be any AES algorithm ("AES-CTR", "AES-CBC", "AES-CMAC", "AES-GCM", "AES-CFB", "AES-KW", "ECDH", "DH", or "HMAC")
+                        //the generateKey parameters for that type of algorithm
+                        length: 256, //can be  128, 192, or 256
+                    },
+                    true, //whether the derived key is extractable (i.e. can be used in exportKey)
+                    ["encrypt", "decrypt"] //limited to the options in that algorithm's importKey
+                )
+                .then(function(keydata) {
+                    //returns the exported key data
+
+                    // For Demo Purpos Only Exported in JWK format
+                    window.crypto.subtle.exportKey("jwk", keydata).then(
+                        function(keydata) {
+                            dKey = keydata;
+                            //document.getElementById("deriveKey").value = dKey.k
+                            //document.getElementById("deriveKeyUsage").value = JSON.stringify(dKey)
+                            document.getElementById("sharedKey").value = JSON.stringify(dKey);
+
+                            var myPrivKey_now = document.getElementById("myPrivKey").value;
+
+                            var myPubKey_now = document.getElementById("myPubKey").value;
+
+                           if (typeof(Storage) !== "undefined") {
+                              window.localStorage.setItem("PubKey", myPubKey_now);
+                              window.localStorage.setItem("PrivKey", myPrivKey_now);
+
+                           }
+
+
+
+                        }
+                    );
+                })
+                .catch(function(err) {
+                    console.error(err);
+                });
+
+})
+.catch(function(err){
+    console.error(err);
+});
+
+
+   
+}
+
+
+function ECDH_AES_GCM_Encrypt() {
+
+    var cryptoObj = window.crypto || window.msCrypto;
+    var nonce_str = randomString(12);
+    var nonce = asciiToUint8Array(nonce_str);
+
+    if (!cryptoObj) {
+        alert("Crypto API is not supported by the Browser");
+        return;
+    }
+
+    var plainText = document.getElementById("resultGCM").value;
+    var deriveKeyUsage = document.getElementById("sharedKey").value;
+
+    if (!deriveKeyUsage) {
+        alert("My private key and Peer public key should not be empty");
+        return;
+    }
+
+    obj = JSON.parse(deriveKeyUsage);
+    alg1 = obj.alg;
+    ext1 = obj.ext;
+    k1 = obj.k;
+    kty1 = obj.kty;
+
+    crypto.subtle.importKey("jwk", {
+        alg: alg1,
+        ext: ext1,
+        k: k1,
+        kty: kty1
+    }, "aes-gcm", false, ["encrypt"]).then(function(key) {
+
+	return crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv: nonce,
+      },
+      key,
+      new TextEncoder().encode(plainText)
+    );
+
+    }, failAndLog).then(function(cipherText) {
+	combinedEncrypted = _append2Buffer(nonce, cipherText);
+
+    // Encrypted version
+    //add_log_enc(_arrayBufferToBase64(combinedEncrypted))
+    add_log(_arrayBufferToBase64(combinedEncrypted));
+
+        //document.getElementById("resultGCM").value = bytesToHexString(cipherText);
+    }, failAndLog);
+}
+
+
+function ECDH_AES_GCM_Decrypt() {
+
+    var cryptoObj = window.crypto || window.msCrypto;
+
+    if (!cryptoObj) {
+        alert("Crypto API is not supported by the Browser");
+        return;
+    }
+
+    var plainText = document.getElementById("resultGCM").value;
+    var combined = fromBase64(plainText);
+    let nonce = combined.slice(0, 12)
+    let tag = combined.slice(-16)
+    let cipher = combined.slice(12, -16)
+
+
+    var deriveKeyUsage = document.getElementById("sharedKey").value;
+
+    if (!deriveKeyUsage) {
+	alert("My private key and Peer public key should not be empty");
+
+        return;
+    }
+    obj = JSON.parse(deriveKeyUsage);
+    alg1 = obj.alg;
+    ext1 = obj.ext;
+    k1 = obj.k;
+    kty1 = obj.kty;
+
+    crypto.subtle.importKey("jwk", {
+        alg: alg1,
+        ext: ext1,
+        k: k1,
+        kty: kty1
+    }, "aes-gcm", false, ["decrypt"]).then(function(key) {
+	return crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: nonce,
+      },
+      key,
+      _append2Buffer(cipher, tag));
+
+    }, failAndLog).then(function(cipherText) {
+        //alert(bytesToASCIIString(cipherText));
+	let result = new TextDecoder().decode(cipherText)
+        document.getElementById("resultGCM").value = result;
+    }, failAndLog);
+}
+
+
+
+function ECDH_AES_CTR_Encrypt() {
+
+    var cryptoObj = window.crypto || window.msCrypto;
+
+    if (!cryptoObj) {
+        alert("Crypto API is not supported by the Browser");
+        return;
+    }
+
+    var plainText = document.getElementById("resultGCM").value;
+    var deriveKeyUsage = document.getElementById("sharedKey").value;
+
+    if (!publicKey) {
+        alert("Generate ECDH Key First");
+        return;
+    }
+
+    obj = JSON.parse(deriveKeyUsage);
+    alg1 = obj.alg;
+    ext1 = obj.ext;
+    k1 = obj.k;
+    kty1 = obj.kty;
+
+    crypto.subtle.importKey("jwk", {
+        alg: alg1,
+        ext: ext1,
+        k: k1,
+        kty: kty1
+    }, "aes-ctr", false, ["encrypt"]).then(function(key) {
+        return crypto.subtle.encrypt({
+            name: "aes-ctr",
+            counter: iv,
+            length: 128
+        }, key, asciiToUint8Array(plainText));
+    }, failAndLog).then(function(cipherText) {
+        document.getElementById("resultGCM").value = bytesToHexString(cipherText);
+    }, failAndLog);
+}
+
+
+    function ECDH_AES_CTR_Decrypt() {
+
+    var cryptoObj = window.crypto || window.msCrypto;
+
+    if (!cryptoObj) {
+        alert("Crypto API is not supported by the Browser");
+        return;
+    }
+
+    var plainText = document.getElementById("resultGCM").value;
+    var deriveKeyUsage = document.getElementById("sharedKey").value;
+
+    if (!deriveKeyUsage) {
+        alert("Generate ECDH Key First and perform Encrypttion");
+        return;
+    }
+    obj = JSON.parse(deriveKeyUsage);
+    alg1 = obj.alg;
+    ext1 = obj.ext;
+    k1 = obj.k;
+    kty1 = obj.kty;
+
+    crypto.subtle.importKey("jwk", {
+        alg: alg1,
+        ext: ext1,
+        k: k1,
+        kty: kty1
+    }, "aes-ctr", false, ["decrypt"]).then(function(key) {
+        return crypto.subtle.decrypt({
+            name: "aes-ctr",
+            counter: iv,
+            length: 128
+        }, key, hexStringToUint8Array(plainText));
+    }, failAndLog).then(function(cipherText) {
+        //alert(bytesToASCIIString(cipherText));
+        document.getElementById("resultGCM").value = bytesToASCIIString(cipherText);
+    }, failAndLog);
+}
+
+
+    function bytesToASCIIString(bytes) {
+        return String.fromCharCode.apply(null, new Uint8Array(bytes));
+    }
+
+    function bytesToHexString(bytes) {
+        if (!bytes)
+            return null;
+
+        bytes = new Uint8Array(bytes);
+        var hexBytes = [];
+
+        for (var i = 0; i < bytes.length; ++i) {
+            var byteString = bytes[i].toString(16);
+            if (byteString.length < 2)
+                byteString = "0" + byteString;
+            hexBytes.push(byteString);
+        }
+
+        return hexBytes.join("");
+    }
+
+    function hexStringToUint8Array(hexString) {
+        if (hexString.length % 2 != 0)
+            throw "Invalid hexString";
+        var arrayBuffer = new Uint8Array(hexString.length / 2);
+
+        for (var i = 0; i < hexString.length; i += 2) {
+            var byteValue = parseInt(hexString.substr(i, 2), 16);
+            if (byteValue == NaN)
+                throw "Invalid hexString";
+            arrayBuffer[i / 2] = byteValue;
+        }
+
+        return arrayBuffer;
+    }
+
+
+    function failAndLog(error) {
+        console.log(error);
+        alert(error)
+    }
+
+function HideMyPrivKey() {
+  var x = document.getElementById("myPrivKeyGroup");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+
+}
+
+function HideOrDisplay() {
+  var x = document.getElementById("myPrivKeyGroup");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+
+
+  var t = document.getElementById("hideOrDisplayButton");
+  if(t.value=="hidePrivKey"){
+      t.value="showPrivKey";}
+  else if(t.value=="showPrivKey"){
+      t.value="hidePrivKey";}
+}
+
+function BasicOrAdvance() {
+
+
+  var t = document.getElementById("showBasicOrAdvance");
+	    if(t.innerText==="showAdvanced"){
+      var x = document.getElementById("myPrivKeyGroup");
+      x.style.display = "block";
+
+      var x = document.getElementById("myPubKeyGroup");
+      x.style.display = "block";
+
+      var x = document.getElementById("peerPubKeyGroup");
+      x.style.display = "block";
+
+/*
+      var x = document.getElementById("sharedKeyGroup");
+      x.style.display = "block";
+
+      var x = document.getElementById("genMyKey");
+      x.style.display = "block";
+*/
+
+      var x = document.getElementById("copyMyPubKey");
+      x.style.display = "block";
+
+/*
+      var x = document.getElementById("genShdKey");
+      x.style.display = "block";
+*/
+
+      var x = document.getElementById("clearKeys");
+      x.style.display = "block";
+
+/*
+      var x = document.getElementById("copyPrivKey");
+      x.style.display = "block";
+
+      var x = document.getElementById("copyPrivKeyWithLink");
+      x.style.display = "block";
+*/
+
+      var x = document.getElementById("keybuttons");
+      x.style.display = "block";
+
+
+		    t.innerText="hideAdvanced";}
+	else if(t.innerText==="hideAdvanced"){
+
+            var x = document.getElementById("myPrivKeyGroup");
+      x.style.display = "none";
+
+      var x = document.getElementById("myPubKeyGroup");
+      x.style.display = "none";
+
+      var x = document.getElementById("peerPubKeyGroup");
+      x.style.display = "none";
+
+      var x = document.getElementById("sharedKeyGroup");
+      x.style.display = "none";
+
+      var x = document.getElementById("genMyKey");
+      x.style.display = "none";
+
+      var x = document.getElementById("copyMyPubKey");
+      x.style.display = "none";
+
+      var x = document.getElementById("genShdKey");
+      x.style.display = "none";
+
+      var x = document.getElementById("clearKeys");
+      x.style.display = "none";
+
+/*
+      var x = document.getElementById("copyPrivKey");
+      x.style.display = "none";
+*/
+
+      var x = document.getElementById("copyPrivKeyWithLink");
+      x.style.display = "none";
+
+
+      var x = document.getElementById("keybuttons");
+      x.style.display = "none";
+
+
+
+		t.innerText="showAdvanced";}
+}
+
+  function downloadObjectAsJson(exportObj, exportName){
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", exportName + ".json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
+
+
+/*
+	<button type="button"  id="showBasicOrAdvance" style="font-size : 12px" onclick="BasicOrAdvance()">hideAdvanced</button>
+
+	*/
+    </script>
+</head>
+<body>
+    <div class='layout-outer'>
+
+	    <h1>ECDH-AES Crypto          <button type="button"  id="linkWithMyPubKey" style="font-size : 12px" onclick="copyWithLink2()">shareSecretChannel</button>
+</h1>
+
+    <div class='Navbar' id="keybuttons" >
+       <button type="button"  id="genMyKey" style="font-size : 12px;display:none" onclick="generateKey()">genMyKey</button>
+       <button type="button"  id="copyMyPubKey" style="font-size : 12px" onclick="copyKey()">copyMyPubKey</button>
+       <button type="button"  id="genShdKey" style="font-size : 12px;display:none" onclick="ecdhGenerateSharedKey()">genShdKey</button>
+       <button type="button"  id="exportPrivKey" style="font-size : 12px" onclick="exportPrivKey()">exportMyKey</button>
+       <button type="button"  id="importPrivKey" style="font-size : 12px" onclick="document.getElementById('jsonfileinput').click()">importMyKey</button>
+       <input type="file" id="jsonfileinput" accept=".json" style="display:none"/>
+       <button type="button"  id="clearKeys" style="font-size : 12px" onclick="clearKeys()">clearKeys</button>
+
+       <button type="button"  id="copyPrivKey" style="font-size : 12px" onclick="copyPrivKey()">copyMyPrivKey</button>
+       <button type="button"  id="copyPrivKeyWithLink" style="font-size : 12px;display:none" onclick="copyPrivKeyWithLink()">copyPrivKeyWithLink</button>
+
+
+    </div>
+<script type="text/javascript">
+
+        document.getElementById("jsonfileinput").addEventListener("change", function() {
+  var file_to_read = document.getElementById("jsonfileinput").files[0];
+  var fileread = new FileReader();
+  fileread.onload = function(e) {
+    var content = e.target.result;
+    var intern = JSON.parse(content); // parse json
+    console.log(intern); // You can index every object
+    //document.getElementById("myPrivKey").value = window.localStorage.getItem("PrivKey");
+    //document.getElementById("myPubKey").value = window.localStorage.getItem("PubKey");
+    document.getElementById("myPrivKey").value = intern["PrivKey"];
+    document.getElementById("myPubKey").value = intern["PubKey"];
+
+    var myPrivKey = document.getElementById("myPrivKey").value;
+
+    var myPubKey = document.getElementById("myPubKey").value;
+
+    if (typeof(Storage) !== "undefined") {
+       window.localStorage.setItem("PubKey", myPubKey);
+       window.localStorage.setItem("PrivKey", myPrivKey);
+    }
+
+
+    var peerPubKey = document.getElementById("peerPubKey").value;
+    if (peerPubKey != ""){
+	    ecdhGenerateSharedKey();
+    }
+
+  };
+  fileread.readAsText(file_to_read);
+});
+
+</script>
+
+    <div id="myPrivKeyGroup">
+        My private key<input type="text" class='PasswordField' id="myPrivKey" placeholder="1. click importMyKey or paste it here" size="45" autocomplete='off' autocapitalize='off' autocorrect='off' spellcheck='false' />
+
+    </div>
+
+
+    <div id="myPubKeyGroup">
+        My public key<input type="text" class='PasswordField' id="myPubKey" placeholder="1. click importMyKey or paste it here" size="45" autocomplete='off' autocapitalize='off' autocorrect='off' spellcheck='false' />
+
+    </div>
+    
+    <div id="peerPubKeyGroup">
+        Peer public key<input type="text" class='PasswordField' id="peerPubKey" placeholder="2. paste Peer's 'My public key' here" size="45" autocomplete='off' autocapitalize='off' autocorrect='off' spellcheck='false' />
+
+    </div>
+    <div id="sharedKeyGroup" style="display:none">
+        Shared key<input type="text" class='PasswordField' id="sharedKey"  placeholder="auto generated when My private key and Peer public key filled" size="45" autocomplete='off' autocapitalize='off' autocorrect='off' spellcheck='false' />
+
+    </div>
+
+    <div class='Navbar' id="operation">
+	    <button type="button" style="font-size : 12px" onclick="ECDH_AES_GCM_Encrypt()">encrypt</button>
+	    <button type="button" style="font-size : 12px" onclick="ECDH_AES_GCM_Decrypt()">decrypt</button>
+	    <button type="button" style="font-size : 12px" onclick="copyResultText()">copy</button>
+	    <button type="button" style="font-size : 12px" onclick="copyWithLink()" >copyWithMyPubKey</button>
+            <button type="button" style="font-size : 12px" onclick="clearAllText()" >clear</button>
+    </div>
+    <div class='Content'>
+    <div>
+	<textarea id="resultGCM" class='MessageField' name="resultGCM" value="" placeholder="3. input or paste here and click encrypt or decrypt" style="font-size: 12pt;height:100vw"   ></textarea>
+</textarea>
+    </div>
+    </div>
+    </div>
+<script type="text/javascript">
+
+    document.getElementById("peerPubKey").addEventListener("change", function() {
+    var peerPubKey = document.getElementById("peerPubKey").value;
+    var myPrivKey = document.getElementById("myPrivKey").value;
+
+    if ((peerPubKey != "")&&(myPrivKey != "")){
+            ecdhGenerateSharedKey();
+	    setFocus("resultGCM");
+    }
+
+});
+
+    document.getElementById("myPrivKey").addEventListener("change", function() {
+    var peerPubKey = document.getElementById("peerPubKey").value;
+    var myPrivKey = document.getElementById("myPrivKey").value;
+
+    if ((peerPubKey != "")&&(myPrivKey != "")){
+            ecdhGenerateSharedKey();
+	    setFocus("resultGCM");
+
+    }
+
+});
+
+
+</script>
+</body>
+</html>
