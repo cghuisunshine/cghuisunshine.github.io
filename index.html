@@ -264,10 +264,15 @@ function asciiToUint8Array(str)
   //copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
   /* Copy the text inside the text field */
-  navigator.clipboard.writeText(copyText.value);
+  navigator.clipboard.writeText(copyText.value)
+  .then(() => {
+     /* Alert the copied text */
+     alert("Result text copied to clipboard, and you can send it to Peer");
+  })
+  .catch(() => {
+       alert("something went wrong");
+   });
 
-  /* Alert the copied text */
-  alert("Result text copied to clipboard, and you can send it to Peer");
 }
 
 function copyKey() {
@@ -278,10 +283,15 @@ function copyKey() {
   //copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
   /* Copy the text inside the text field */
-  navigator.clipboard.writeText(copyText.value);
+  navigator.clipboard.writeText(copyText.value)
+  .then(() => {
+        /* Alert the copied text */
+        alert("My public key copied to clipboard, and you can send it to Peer");
+   })
+   .catch(() => {
+	   alert("something went wrong");
+    });
 
-  /* Alert the copied text */
-  alert("My public key copied to clipboard, and you can send it to Peer");
 }
 function copyPrivKey() {
   /* Get the text field */
@@ -291,10 +301,14 @@ function copyPrivKey() {
   //copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
   /* Copy the text inside the text field */
-  navigator.clipboard.writeText(copyText.value);
-
-  /* Alert the copied text */
-  alert("My private key copied to clipboard, and you can save it: " + copyText.value);
+  navigator.clipboard.writeText(copyText.value)
+  .then(() => {
+      /* Alert the copied text */
+      alert("My private key copied to clipboard, and you can save it: " + copyText.value);
+   })
+   .catch(() => {
+      alert("something went wrong");
+   });
 }
 
 function exportPrivKey() {
@@ -350,10 +364,15 @@ function copyPrivKeyWithLink() {
 
           var prompt_text = "This is my secure communication link. Please input your words, click encrypt, click copyWithLink(or click copy for not the first encrypted message), paste it somewhere and send it to me.  ";
           clipboard_text = priv_key + "\n\n" + prompt_text + clipboard_text;
-          navigator.clipboard.writeText(clipboard_text);
+	  navigator.clipboard.writeText(clipboard_text)
+          .then(() => {
+	       /* Alert the copied text */
+               alert("Private key with link copied to clipboard, and you can save it for future use");
+          })
+          .catch(() => {
+             alert("something went wrong");
+          });
 
-          /* Alert the copied text */
-         alert("Private key with link copied to clipboard, and you can save it for future use");
   }
 }
 
@@ -377,19 +396,15 @@ function copyPrivKeyWithLink() {
           if (search_http) {
 	    if (document.getElementById("myPubKey").value === "") {
 	      clipboard_text = current_url.split("?")[0] + "?input=" + encodeURIComponent(copyText.value);
-	      //navigator.clipboard.writeText(current_url.split("?")[0] + "?input=" + encodeURIComponent(copyText.value));
 	    } else {
 	       clipboard_text = current_url.split("?")[0] + "?input=" + encodeURIComponent(copyText.value) + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value);
-	       //navigator.clipboard.writeText(current_url.split("?")[0] + "?input=" + encodeURIComponent(copyText.value) + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value));
 	    }
           } else {
 
 	    if (document.getElementById("myPubKey").value === "") {
 	       clipboard_text = "https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=" + encodeURIComponent(copyText.value);
-               //navigator.clipboard.writeText("https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=" + encodeURIComponent(copyText.value));
             } else {
 	       clipboard_text = "https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=" + encodeURIComponent(copyText.value) + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value);
-               //navigator.clipboard.writeText("https://kangyong.duckdns.org/test/webcrypto/ecdh.html?input=" + encodeURIComponent(copyText.value) + "&peerPubKey=" + encodeURIComponent(document.getElementById("myPubKey").value));
             }
           }
 
@@ -397,18 +412,21 @@ function copyPrivKeyWithLink() {
 	       clipboard_text = clipboard_text + "&myPubKey=" + encodeURIComponent(document.getElementById("peerPubKey").value) 
 	    }
 
-	  if ((myPrivKey != "")&&(peerPubKey ==="")) {
-	      var prompt_text = "This is my secure communication link. Please input your words, click encrypt, click copyWithLink(or click copy for not the first encrypted message), paste it somewhere and send it to me.  ";
-	      //clipboard_text = prompt_text + clipboard_text;
-	    }
-	  navigator.clipboard.writeText(clipboard_text);
+	  navigator.clipboard.writeText(clipboard_text)
+          .then(() => {
+             /* Alert the copied text */
+             if (peerPubKey == "") {
+                alert("My public key with link copied to clipboard, and you can send it to Peer for him to encrypt message and send back to you");
+              } else {
+                alert("My public key and encrypted message with link copied to clipboard, and you can send it to Peer");
+              }
 
-          /* Alert the copied text */
-	 if (peerPubKey == "") {
-	      alert("My public key with link copied to clipboard, and you can send it to Peer for him to encrypt message and send back to you");
-	    } else {
-	      alert("My public key and encrypted message with link copied to clipboard, and you can send it to Peer");
-	    }
+          })
+          .catch(() => {
+             alert("something went wrong");
+          });
+
+
   } else {
       alert("You should encrypt first before copyWithLink");
   }
@@ -424,13 +442,6 @@ function copyPrivKeyWithLink() {
   var myPrivKey = document.getElementById("myPrivKey").value;
 
   var myPubKey = document.getElementById("myPubKey").value;
-/*
-  if (typeof(Storage) !== "undefined") {
-     window.localStorage.setItem("PubKey", myPubKey);
-     window.localStorage.setItem("PrivKey", myPrivKey);
-
-  }
-*/
 
    //use explicit url in case your encryption/decryption web is local
    let current_url = window.location.href;
@@ -458,8 +469,13 @@ function copyPrivKeyWithLink() {
           if (myPrivKey != "") {
               var prompt_text = "This is my secure communication link. Please input your words, click encrypt, click copyWithMyPubKey(copy button only work for not the first encrypted message), paste it somewhere and send it to me.  ";
               clipboard_text = prompt_text + clipboard_text;
-	      navigator.clipboard.writeText(clipboard_text);
-	      alert("My public key with link copied to clipboard, and you can send it to Peer for him to encrypt message and send back to you");
+	      navigator.clipboard.writeText(clipboard_text)
+              .then(() => {
+                  alert("My public key with link copied to clipboard, and you can send it to Peer for him to encrypt message and send back to you");
+               })
+               .catch(() => {
+                  alert("something went wrong");
+               });
 
           } else 
 	 {
