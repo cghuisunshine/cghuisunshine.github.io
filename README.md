@@ -1,9 +1,7 @@
-# cghuisunshine.github.io
+# ECDH-AES Crypto 
 
-ECDH-AES Crypto
-https://cghuisunshine.github.io/ecdh.html
 
-Funciton 1: Leave a secret message
+**Funciton 1: Leave a secret message**
    Step 1: Share your secret link
         Open the link https://cghuisunshine.github.io/ecdh.html, click importMyKey if you already save it before, otherwise click exportMyKey to save it. 
       Then click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
