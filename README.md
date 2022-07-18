@@ -48,7 +48,7 @@
    Step 4: each party(you or someone) repeat Step 3 to continue the chat.
    
    
-   **Pros:**
+    **Pros:**
    
       1. Forget previous chat automatically
       
