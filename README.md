@@ -1,7 +1,7 @@
 # ECDH-AES Crypto 
 
 
-**Funciton 1: Leave a secret message**
+**Use Cases 1: Leave a secret message**
 
    Step 1: Share your secret link
    
@@ -19,7 +19,7 @@
         
         Click decrypt to parse the secret message.
          
-**Funciton 2: Chat to someone with your saved key**
+**Use Cases 2: Chat to someone with your saved key**
 
     Similar to Leave a secret message, everyone use their saved key every time to chat with someone else: When you received the encrypted message that 
     
@@ -29,7 +29,7 @@
 
 
 
-**Function 3: Chat to someone with temporary key**
+**Use Cases 3: Chat to someone with temporary key**
 
    Step 1: Share your temporary secret link
    
