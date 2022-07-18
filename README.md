@@ -23,9 +23,9 @@
 
     Similar to Leave a secret message, everyone use their saved key every time to chat with someone else: When you received the encrypted message that 
     
-  encrypted with your public key, click the link that contains the encrypted message, click importMyKey to import your key file(myKeys.json that you use
-  
-  exportMyKey saved before), click decrypt to parse the secret message.  
+     encrypted with your public key, click the link that contains the encrypted message, click importMyKey to import your key file(myKeys.json that you 
+     
+     use exportMyKey saved before), click decrypt to parse the secret message.  
 
 
 
