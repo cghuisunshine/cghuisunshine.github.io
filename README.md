@@ -1,12 +1,12 @@
 # AES Crypto 
 
-[https://cghuisunshine.github.io/aes.html]
+[AES Crypto](https://cghuisunshine.github.io/aes.html)
 
 **Use Cases 1: Fixed key encryption/decryption**
 
    Step 1: Encrypt 
    
-        Open the link https://cghuisunshine.github.io/aes.html, input words, click Encrypt, click CopyWithLink and paste it in WeCat, SMS, or Email to 
+        Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html), input words, click Encrypt, click CopyWithLink and paste it in WeCat, SMS, or Email to 
         
         someone. 
         
@@ -59,13 +59,13 @@
 
 # ECDH-AES Crypto 
 
-[https://cghuisunshine.github.io/ecdh.html]
+[ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html)
 
 **Use Cases 1: Leave a secret message**
 
    Step 1: Share your secret link
    
-        Open the link [https://cghuisunshine.github.io/ecdh.html], click importMyKey if you already save it before, otherwise click exportMyKey to save it.
+        Open the link [ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html), click importMyKey if you already save it before, otherwise click exportMyKey to save it.
         
       Then click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
       
@@ -93,7 +93,7 @@
 
    Step 1: Share your temporary secret link
    
-        Open the link [https://cghuisunshine.github.io/ecdh.html], click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
+        Open the link [ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html), click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
         
    Step 2: Send secret message 
    
@@ -112,7 +112,7 @@
    
       1. Forget previous chat automatically
       
-         Use temporary key and every time you open the link  [https://cghuisunshine.github.io/ecdh.html], a new temporary key pair would generate and 
+         Use temporary key and every time you open the link  [ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html), a new temporary key pair would generate and 
          
        replace the old temporary one, which means you would forget what you have said before.
        
