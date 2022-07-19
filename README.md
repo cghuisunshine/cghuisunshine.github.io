@@ -108,7 +108,7 @@ https://cghuisunshine.github.io/ecdh.html
    Step 4: each party(you or someone) repeat Step 3 to continue the chat.
    
    
-    **Pros:**
+   **Pros:**
    
       1. Forget previous chat automatically
       
@@ -122,7 +122,7 @@ https://cghuisunshine.github.io/ecdh.html
          
          After that, each party would input words, click encrypt, click copyWithMyPubKey and send it to counterpart.
          
-    **Cons:**
+   **Cons:**
     
        1. You can chat with one person only at the same time.
        
