@@ -1,6 +1,6 @@
 # AES Crypto 
 
-https://cghuisunshine.github.io/aes.html
+[https://cghuisunshine.github.io/aes.html]
 
 **Use Cases 1: Fixed key encryption/decryption**
 
@@ -30,7 +30,7 @@ https://cghuisunshine.github.io/aes.html
  
    Step 2: Encrypt 
    
-        Open the link https://cghuisunshine.github.io/aes.html, click showKeys, paste your saved shared key, input words, click Encrypt, click 
+        Open the link [https://cghuisunshine.github.io/aes.html], click showKeys, paste your saved shared key, input words, click Encrypt, click 
         
         Copy and paste it in WeCat, SMS, or Email to someone. 
         
@@ -59,13 +59,13 @@ https://cghuisunshine.github.io/aes.html
 
 # ECDH-AES Crypto 
 
-https://cghuisunshine.github.io/ecdh.html
+[https://cghuisunshine.github.io/ecdh.html]
 
 **Use Cases 1: Leave a secret message**
 
    Step 1: Share your secret link
    
-        Open the link https://cghuisunshine.github.io/ecdh.html, click importMyKey if you already save it before, otherwise click exportMyKey to save it.
+        Open the link [https://cghuisunshine.github.io/ecdh.html], click importMyKey if you already save it before, otherwise click exportMyKey to save it.
         
       Then click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
       
@@ -93,7 +93,7 @@ https://cghuisunshine.github.io/ecdh.html
 
    Step 1: Share your temporary secret link
    
-        Open the link https://cghuisunshine.github.io/ecdh.html, click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
+        Open the link [https://cghuisunshine.github.io/ecdh.html], click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
         
    Step 2: Send secret message 
    
@@ -112,7 +112,7 @@ https://cghuisunshine.github.io/ecdh.html
    
       1. Forget previous chat automatically
       
-         Use temporary key and every time you open the link  https://cghuisunshine.github.io/ecdh.html, a new temporary key pair would generate and 
+         Use temporary key and every time you open the link  [https://cghuisunshine.github.io/ecdh.html], a new temporary key pair would generate and 
          
        replace the old temporary one, which means you would forget what you have said before.
        
