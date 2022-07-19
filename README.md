@@ -1,6 +1,5 @@
-# AES Crypto 
+# [AES Crypto](https://cghuisunshine.github.io/aes.html) 
 
-[AES Crypto](https://cghuisunshine.github.io/aes.html)
 
 **Use Cases 1: Fixed key encryption/decryption**
 
@@ -57,9 +56,8 @@
         
 
 
-# ECDH-AES Crypto 
+# [ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html)
 
-[ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html)
 
 **Use Cases 1: Leave a secret message**
 
