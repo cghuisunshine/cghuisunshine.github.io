@@ -91,7 +91,7 @@
 
    Step 1: Share your temporary secret link
    
-        Open the link [ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html), click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
+        Open the link https://cghuisunshine.github.io/ecdh.html, click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
         
    Step 2: Send secret message 
    
@@ -110,7 +110,7 @@
    
       1. Forget previous chat automatically
       
-         Use temporary key and every time you open the link  [ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html), a new temporary key pair would generate and 
+         Use temporary key and every time you open the link  https://cghuisunshine.github.io/ecdh.html, a new temporary key pair would generate and 
          
        replace the old temporary one, which means you would forget what you have said before.
        
