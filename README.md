@@ -5,10 +5,9 @@
 
    Step 1: Encrypt 
    
-        Open the link [Markdown - Link](# [AES Crypto](https://cghuisunshine.github.io/aes.html))
-[AES Crypto](https://cghuisunshine.github.io/aes.html), input words, click Encrypt, click CopyWithLink and paste it in WeCat, SMS, or Email to 
+        Open the link https://cghuisunshine.github.io/aes.html, input words, click Encrypt, click CopyWithLink and paste it in WeCat, SMS, 
         
-        someone. 
+        or Email to someone. 
         
    Step 2: Decrpt
         
@@ -30,7 +29,7 @@
  
    Step 2: Encrypt 
    
-        Open the link [https://cghuisunshine.github.io/aes.html], click showKeys, paste your saved shared key, input words, click Encrypt, click 
+        Open the link https://cghuisunshine.github.io/aes.html, click showKeys, paste your saved shared key, input words, click Encrypt, click 
         
         Copy and paste it in WeCat, SMS, or Email to someone. 
         
