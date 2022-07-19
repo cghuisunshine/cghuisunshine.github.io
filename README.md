@@ -1,5 +1,65 @@
+# AES Crypto 
+
+https://cghuisunshine.github.io/aes.html
+
+**Use Cases 1: Fixed key encryption/decryption**
+
+   Step 1: Encrypt 
+   
+        Open the link https://cghuisunshine.github.io/aes.html, input words, click Encrypt, click CopyWithLink and paste it in WeCat, SMS, or Email to 
+        
+        someone. 
+        
+   Step 2: Decrpt
+        
+        Open the link with encrypted message, click Decrypt.
+        
+   **Pros:**
+   
+       Easy for use.
+   
+   **Cons:**
+   
+       Not for serious securtiy usage, because everyone could use it to decrypt secret messages
+       
+ **Use Cases 2: Private shared key encryption/decryption**
+ 
+   Step 1: Create and share shared key
+ 
+      Click ShowKeys, click generateKey, click copyKey, paste it somewhere for later usage and send it to someone secretly wiht who you want to talk with.
+ 
+   Step 2: Encrypt 
+   
+        Open the link https://cghuisunshine.github.io/aes.html, click showKeys, paste your saved shared key, input words, click Encrypt, click 
+        
+        Copy and paste it in WeCat, SMS, or Email to someone. 
+        
+   Step 3: Decrpt
+        
+        Open the link https://cghuisunshine.github.io/aes.html, click showKeys, paste your saved shared key, paste encrypted message to input box, 
+        
+        click Decrpt. 
+        
+   **Pros:**
+    
+       Suitable for securtiy usage.
+    
+   **Cons:**
+    
+       1. Need to share shared key with secure channel first.
+       
+       2. Not easy for use.
+        
+    
+        
+        
+        
+        
+
+
 # ECDH-AES Crypto 
 
+https://cghuisunshine.github.io/ecdh.html
 
 **Use Cases 1: Leave a secret message**
 
