@@ -3,9 +3,11 @@
 
 **Use Cases 1: Fixed key encryption/decryption**
 
-   Step 1: Encrypt 
+Step 1: Encrypt 
    
-        Open the link https://cghuisunshine.github.io/aes.html, input words, click Encrypt, click CopyWithLink and paste it in WeCat, SMS, 
+Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
+
+        Input words, click Encrypt, click CopyWithLink and paste it in WeCat, SMS, 
         
         or Email to someone. 
         
@@ -24,18 +26,24 @@
  **Use Cases 2: Private shared key encryption/decryption**
  
    Step 1: Create and share shared key
+   
+   Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
  
       Click ShowKeys, click generateKey, click copyKey, paste it somewhere for later usage and send it to someone secretly wiht who you want to talk with.
  
    Step 2: Encrypt 
    
-        Open the link https://cghuisunshine.github.io/aes.html, click showKeys, paste your saved shared key, input words, click Encrypt, click 
+   Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
+   
+        Click showKeys, paste your saved shared key, input words, click Encrypt, click 
         
         Copy and paste it in WeCat, SMS, or Email to someone. 
         
    Step 3: Decrpt
+   
+   Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
         
-        Open the link https://cghuisunshine.github.io/aes.html, click showKeys, paste your saved shared key, paste encrypted message to input box, 
+        Click showKeys, paste your saved shared key, paste encrypted message to input box, 
         
         click Decrpt. 
         
@@ -63,9 +71,11 @@
 
    Step 1: Share your secret link
    
-        Open the link https://cghuisunshine.github.io/ecdh.html, click importMyKey if you already save it before, otherwise click exportMyKey to save it.
+   Open the link [ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html) 
+   
+        Click importMyKey if you already save it before, otherwise click exportMyKey to save it.
         
-      Then click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
+        Then click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
       
    Step 2: Send secret message 
    
@@ -73,7 +83,7 @@
         
    Step 3: You parse secret message
    
-        Open the link of secret message, click importMyKey to import your key file(myKeys.json that you use exportMyKey saved before).
+        Open the link of secret message received, click importMyKey to import your key file(myKeys.json that you use exportMyKey saved before).
         
         Click decrypt to parse the secret message.
          
@@ -91,7 +101,9 @@
 
    Step 1: Share your temporary secret link
    
-        Open the link https://cghuisunshine.github.io/ecdh.html, click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
+   Open the link [ECDH-AES Crypto](https://cghuisunshine.github.io/ecdh.html)
+   
+        Click shareSecretChannel and paste it in WeChat, SMS or Email to someone. 
         
    Step 2: Send secret message 
    
@@ -99,9 +111,7 @@
         
    Step 3: You parse secret message
    
-        Open the link of secret message, click importMyKey to import your key file(myKeys.json that you use exportMyKey saved before).
-        
-        Click decrypt to parse the secret message.
+        Open the link of secret message you received, click decrypt to parse the secret message.
         
    Step 4: each party(you or someone) repeat Step 3 to continue the chat.
    
@@ -110,9 +120,9 @@
    
       1. Forget previous chat automatically
       
-         Use temporary key and every time you open the link  https://cghuisunshine.github.io/ecdh.html, a new temporary key pair would generate and 
+         Use temporary key and every time you open the link(https://cghuisunshine.github.io/ecdh.html), a new temporary key pair would generate and 
          
-       replace the old temporary one, which means you would forget what you have said before.
+         replace the old temporary one, which means you would forget what you have said before.
        
       2. Easy of use
       
