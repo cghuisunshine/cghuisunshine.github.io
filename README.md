@@ -11,6 +11,10 @@ Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
         
         or Email to someone. 
         
+        Note: If you click AutoDecrypt:off->on to change the auto decrpt switch on, the CopyWithLink would bring that switch, and the receiver would get
+        
+        plain text automatically when open the link without the need of click on decrypt.
+        
    Step 2: Decrpt
         
         Open the link with encrypted message, click Decrypt.
