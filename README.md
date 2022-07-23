@@ -23,6 +23,8 @@ Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
         
         Open the link with encrypted message, click Decrypt.
         
+        Note:  If received encrypted message without link, you shoud paste it in the input box in the link, and click Decrypt.
+        
    **Pros:**
    
        Easy for use.
