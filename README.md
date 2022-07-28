@@ -68,8 +68,8 @@ Step 3: Decrpt
        
        2. Not easy for use.
  
-
-See also in [iPhone keyboard](https://apps.apple.com/us/app/utikeyboard/id1613056608)
+ **Other Usage
+ See also in [iPhone keyboard](https://apps.apple.com/us/app/utikeyboard/id1613056608)
          
     
         
