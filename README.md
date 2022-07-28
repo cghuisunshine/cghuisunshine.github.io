@@ -1,5 +1,5 @@
 # [AES Crypto](https://cghuisunshine.github.io/aes.html) 
-# [Implementation as iPhone keyboard](https://apps.apple.com/us/app/utikeyboard/id1613056608)
+
 
 
 **Use Cases 1: Fixed key encryption/decryption**
@@ -67,7 +67,7 @@ Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
        1. Need to share shared key with secure channel first.
        
        2. Not easy for use.
-        
+# [See also(iPhone keyboard)](https://apps.apple.com/us/app/utikeyboard/id1613056608)       
     
         
         
