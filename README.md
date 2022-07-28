@@ -20,7 +20,7 @@ Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
               
               3. CopyWithLink only suitable for short words, for long words you should use Copy button.
         
-   Step 2: Decrpt
+Step 2: Decrpt
         
         Open the link with encrypted message, click Decrypt.
         
@@ -34,15 +34,15 @@ Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
    
        Not for serious securtiy usage, because everyone could use it to decrypt secret messages
        
- **Use Cases 2: Private shared key encryption/decryption**
+**Use Cases 2: Private shared key encryption/decryption**
  
-   Step 1: Create and share shared key
+Step 1: Create and share shared key
    
    Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
  
       Click ShowKeys, click generateKey, click copyKey, paste it somewhere for later usage and send it to someone secretly wiht who you want to talk with.
  
-   Step 2: Encrypt 
+Step 2: Encrypt 
    
    Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
    
@@ -50,7 +50,7 @@ Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
         
         Copy and paste it in WeCat, SMS, or Email to someone. 
         
-   Step 3: Decrpt
+Step 3: Decrpt
    
    Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
         
