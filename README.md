@@ -1,6 +1,6 @@
 # [AES Crypto](https://cghuisunshine.github.io/aes.html)  
 
-![Basic Usage](https://github.com/cghuisunshine/cghuisunshine.github.io/blob/main/aes_help.JPG)
+![Basic Usage](aes_help.JPG)
 
 **Use Cases 1: Fixed key encryption/decryption**
 
