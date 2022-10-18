@@ -281,7 +281,15 @@ function asciiToUint8Array(str)
   //copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
   /* Copy the text inside the text field */
-  navigator.clipboard.writeText(copyText.value);
+  navigator.clipboard
+      .writeText(copyText.value)
+      .then(() => {
+        //
+      })
+      .catch(() => {
+        alert("something went wrong");
+      });
+
   if (copyOnly === false) {
             if (navigator.share) {
             if (isValidHttpUrl(copyText.value)) {
@@ -319,7 +327,14 @@ function copyKey() {
   //copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
   /* Copy the text inside the text field */
-  navigator.clipboard.writeText(copyText.value);
+  navigator.clipboard
+      .writeText(copyText.value)
+      .then(() => {
+      })
+      .catch(() => {
+        alert("something went wrong");
+      });
+
 
   if (copyOnly === false) {
        if (navigator.share) {
@@ -381,7 +396,14 @@ function copyKey() {
 	  if (autoDecrypt == true) {
               url_copy = url_copy + "&autoDecrypt=1"
 	  }
-	  navigator.clipboard.writeText(url_copy);
+	  navigator.clipboard.writeText(url_copy)
+      .then(() => {
+        
+      })
+      .catch(() => {
+        alert("something went wrong");
+      });
+
     if (copyOnly === false) {
 	    if (navigator.share) {
   navigator.share({
