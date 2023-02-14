@@ -408,6 +408,20 @@ function copyKey() {
 	  //navigator.clipboard.writeText(url_copy);
 	  navigator.clipboard.writeText(url_copy).then(() => {
                 /* clipboard successfully set */
+		  if (copyOnly === false) {
+			if (navigator.share) {
+			  navigator.share({
+			    //title: 'share encryption result with link',
+			    //text: 'Open the link and click Decrypt to get the plain text',
+			    url: url_copy,
+			  })
+			    .then(() => console.log('Successful share'))
+			    .catch((error) => console.log('Error sharing', error));
+				  } else {
+					  /* Alert the copied text */
+				 alert("Result with link copied to clipboard, and you can paste it anywhere");
+				  }
+    		  }
           }, () => {
              /* clipboard write failed */
 	     document.getElementById("resultGCM").value = url_copy;
@@ -415,24 +429,26 @@ function copyKey() {
              copyText.select();
              copyText.setSelectionRange(0, 99999); /* For mobile devices */
              document.execCommand("copy");
+		  
+	     if (copyOnly === false) {
+			if (navigator.share) {
+			  navigator.share({
+			    //title: 'share encryption result with link',
+			    //text: 'Open the link and click Decrypt to get the plain text',
+			    url: url_copy,
+			  })
+			    .then(() => console.log('Successful share'))
+			    .catch((error) => console.log('Error sharing', error));
+				  } else {
+					  /* Alert the copied text */
+				 alert("Result with link copied to clipboard, and you can paste it anywhere");
+				  }
+    		  }
 
           });
 
 
-    if (copyOnly === false) {
-	    if (navigator.share) {
-  navigator.share({
-    //title: 'share encryption result with link',
-    //text: 'Open the link and click Decrypt to get the plain text',
-    url: url_copy,
-  })
-    .then(() => console.log('Successful share'))
-    .catch((error) => console.log('Error sharing', error));
-          } else {
-                  /* Alert the copied text */
-         alert("Result with link copied to clipboard, and you can paste it anywhere");
-          }
-    }
+    
 
   } else {
       alert("You should Encrypt first before CopyWithLink");
