@@ -362,6 +362,23 @@ function copyKey() {
 
 }
 
+function weixinClosePage() {
+    if (typeof WeixinJSBridge == "undefined") {
+        if (document.addEventListener) {
+            document.addEventListener('WeixinJSBridgeReady', weixin_ClosePage, false);
+        } else if (document.attachEvent) {
+            document.attachEvent('WeixinJSBridgeReady', weixin_ClosePage);
+            document.attachEvent('onWeixinJSBridgeReady', weixin_ClosePage);
+        }
+    } else {
+        weixin_ClosePage();
+    }
+}
+function weixin_ClosePage() {
+    WeixinJSBridge.call('closeWindow');
+}
+
+
  function copyPlusURL() {
   /* Get the text field */
   var copyText = document.getElementById("resultGCM");
@@ -420,6 +437,7 @@ function copyKey() {
 				  } else {
 					  /* Alert the copied text */
 				 alert("Result with link copied to clipboard, you can close the window and paste it anywhere");
+				 weixinClosePage();
 				  }
     		  }
           }, () => {
@@ -442,6 +460,7 @@ function copyKey() {
 				  } else {
 					  /* Alert the copied text */
 				 alert("Result with link copied to clipboard, you can close the window and paste it anywhere");
+				 weixinClosePage();
 				  }
     		  }
 
