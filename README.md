@@ -18,7 +18,7 @@ Open the link [AES Crypto](https://cghuisunshine.github.io/aes.html)
         
                get plain text automatically when open the link without the need of click on decrypt.
               
-              2. If you click CopyOnly -> CopyAndShare to change CopyAndShare switch on, the CopyWithLink would pop up Share menu, and you can share it.
+              2. If you click CopyOnly -> CopyAndShare to change CopyAndShare switch on, the CopyWithLink would pop up Share menu, and you can share it.  For some browser, Share menu may not work, and you should close the window, and paste it elsewhere.
               
               3. CopyWithLink only suitable for short words, for long words you should use Copy button.
         
