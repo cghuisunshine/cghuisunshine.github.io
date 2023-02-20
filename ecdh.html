@@ -376,6 +376,22 @@ function copyPrivKeyWithLink() {
   }
 }
 
+function weixinClosePage() {
+    if (typeof WeixinJSBridge == "undefined") {
+        if (document.addEventListener) {
+            document.addEventListener('WeixinJSBridgeReady', weixin_ClosePage, false);
+        } else if (document.attachEvent) {
+            document.attachEvent('WeixinJSBridgeReady', weixin_ClosePage);
+            document.attachEvent('onWeixinJSBridgeReady', weixin_ClosePage);
+        }
+    } else {
+        weixin_ClosePage();
+    }
+}
+function weixin_ClosePage() {
+    WeixinJSBridge.call('closeWindow');
+}
+
 
  function copyWithLink() {
   /* Get the text field */
@@ -420,6 +436,23 @@ function copyPrivKeyWithLink() {
               } else {
                 alert("My public key and encrypted message with link copied to clipboard, and you can send it to Peer");
               }
+
+          }, () => {
+             /* clipboard write failed */
+             document.getElementById("resultGCM").value = clipboard_text;
+             copyText = document.getElementById("resultGCM");
+             copyText.select();
+             copyText.setSelectionRange(0, 99999); /* For mobile devices */
+             document.execCommand("copy");
+
+             if (peerPubKey == "") {
+                alert("My public key with link copied to clipboard, and you can send it to Peer for him to encrypt message and send back to you");
+              } else {
+                alert("My public key and encrypted message with link copied to clipboard, and you can send it to Peer");
+              }
+        
+             weixinClosePage();
+
 
           })
           .catch(() => {
@@ -474,7 +507,16 @@ function copyPrivKeyWithLink() {
                   alert("My public key with link copied to clipboard, and you can send it to Peer for him to encrypt message and send back to you");
                })
                .catch(() => {
-                  alert("something went wrong");
+                  document.getElementById("resultGCM").value = clipboard_text;
+                  var copyText = document.getElementById("resultGCM");
+                  copyText.select();
+                  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+                  document.execCommand("copy");
+
+                  alert("My public key with link copied to clipboard, and you can send it to Peer for him to encrypt message and send back to you");
+                  weixinClosePage();
+
+
                });
 
           } else 
