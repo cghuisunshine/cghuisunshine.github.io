@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Example qrcode web page</title>
+  </head>
+  <body>
+    <h1>Example qrcode web page</h1>
+    <img id="image-container" src="" alt="API response image">
+    <script>
+      fetch('https://kangyong.duckdns.org/node/89d617f6-75c0-42aa-b5e5-ebd5ca4dac80/qrcode')
+        .then(response => response.blob())
+        .then(blob => {
+          const imageUrl = URL.createObjectURL(blob);
+          document.getElementById('image-container').setAttribute('src', imageUrl);
+        })
+        .catch(error => console.error(error));
+    </script>
+  </body>
+</html>
