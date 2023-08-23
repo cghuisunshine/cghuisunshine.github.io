@@ -109,6 +109,16 @@ function inputContainCipherText() {
 async function decrypt() {
   //var clearText = fromBase64(document.getElementById("plainTextGCM").value)
   var cipherText = document.getElementById("resultGCM").value.trim()
+
+  const prefix = "https://cghuisunshine.github.io/aes.html?input=";
+  const ampersandIndex = inputString.indexOf("&");
+
+  if (cipherText.startsWith(prefix) && ampersandIndex !== -1) {
+    const encodedSubstring = inputString.substring(prefix.length, ampersandIndex);
+    const decodedSubstring = decodeURIComponent(encodedSubstring);
+    cipherText = decodedSubstring;
+  } 
+
  
   var result = ""
   var arr = cipherText.split(/\s+/);
