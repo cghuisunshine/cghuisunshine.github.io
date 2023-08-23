@@ -114,7 +114,7 @@ async function decrypt() {
   const ampersandIndex = cipherText.indexOf("&");
 
   if (cipherText.startsWith(prefix) && ampersandIndex !== -1) {
-    const encodedSubstring = inputString.substring(prefix.length, ampersandIndex);
+    const encodedSubstring = cipherText.substring(prefix.length, ampersandIndex);
     const decodedSubstring = decodeURIComponent(encodedSubstring);
     cipherText = decodedSubstring;
   } 
