@@ -111,7 +111,7 @@ async function decrypt() {
   var cipherText = document.getElementById("resultGCM").value.trim()
 
   const prefix = "https://cghuisunshine.github.io/aes.html?input=";
-  const ampersandIndex = inputString.indexOf("&");
+  const ampersandIndex = cipherText.indexOf("&");
 
   if (cipherText.startsWith(prefix) && ampersandIndex !== -1) {
     const encodedSubstring = inputString.substring(prefix.length, ampersandIndex);
