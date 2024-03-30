@@ -36,7 +36,7 @@
         }
 
         function obfuscate() {
-            const inputText = [...document.getElementById('inputText').value]; // Spread into array of code points
+            const inputText = Array.from(document.getElementById('inputText').value);
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
             const insertCount = Math.pow(2, obfuscationCount) - 1;
             let obfuscatedText = '';
@@ -53,8 +53,9 @@
 
 
 
+
         function restore() {
-            const inputText = [...document.getElementById('inputText').value]; // Spread into array of code points
+            const inputText = Array.from(document.getElementById('inputText').value);
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
             const skipCount = Math.pow(2, obfuscationCount) - 1;
             let restoredText = '';
@@ -65,6 +66,7 @@
         
             document.getElementById('resultText').value = restoredText;
         }
+
 
 
 
