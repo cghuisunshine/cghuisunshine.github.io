@@ -58,6 +58,7 @@
         function moveResultToInput() {
             const result = document.getElementById('resultText').value;
             document.getElementById('inputText').value = result;
+            document.getElementById('resultText').value = ''; // Clearing the result after moving
         }
 
         function copyResult() {
