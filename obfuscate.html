@@ -22,7 +22,7 @@
     <textarea id="inputText" placeholder="Enter text..."></textarea><br>
     <button onclick="obfuscate()">Obfuscate</button>
     <button onclick="restore()">Restore</button>
-    <button onclick="clearInput()">Clear</button>
+    <button onclick="clearInput()">Clear Input</button>
     <h2>Result:</h2>
     <textarea id="resultText" readonly></textarea><br>
     <button onclick="copyResult()">Copy Result</button>
@@ -52,7 +52,6 @@
 
         function clearInput() {
             document.getElementById('inputText').value = '';
-            document.getElementById('resultText').value = '';
         }
 
         function copyResult() {
