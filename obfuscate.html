@@ -36,30 +36,35 @@
         }
 
         function obfuscate() {
-            let inputText = document.getElementById('inputText').value;
+            const inputText = document.getElementById('inputText').value;
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
-            for (let j = 0; j < obfuscationCount; j++) {
-                let obfuscatedText = '';
-                for (const char of inputText) {
-                    obfuscatedText += getRandomChineseCharacter() + char;
+            const insertCount = Math.pow(2, obfuscationCount) - 1; // Number of characters to insert
+            let obfuscatedText = '';
+        
+            for (const char of inputText) {
+                for (let i = 0; i < insertCount; i++) {
+                    obfuscatedText += getRandomChineseCharacter();
                 }
-                inputText = obfuscatedText;
+                obfuscatedText += char;
             }
-            document.getElementById('resultText').value = inputText;
+        
+            document.getElementById('resultText').value = obfuscatedText;
         }
+
 
         function restore() {
             let inputText = document.getElementById('inputText').value;
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
-            for (let j = 0; j < obfuscationCount; j++) {
-                let restoredText = '';
-                for (let i = 1; i < inputText.length; i += 2) {
-                    restoredText += inputText.charAt(i);
-                }
-                inputText = restoredText;
+            const skipCount = Math.pow(2, obfuscationCount) - 1; // Number of characters to skip
+            let restoredText = '';
+        
+            for (let i = skipCount; i < inputText.length; i += skipCount + 1) {
+                restoredText += inputText.charAt(i);
             }
-            document.getElementById('resultText').value = inputText;
+        
+            document.getElementById('resultText').value = restoredText;
         }
+
 
 
         function clearInput() {
