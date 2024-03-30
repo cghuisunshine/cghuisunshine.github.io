@@ -20,6 +20,8 @@
 <body>
     <h1>Text Obfuscation and Restoration Tool</h1>
     <textarea id="inputText" placeholder="Enter text..."></textarea><br>
+    <label>Obfuscation Count:</label>
+    <input type="number" id="obfuscationCount" value="1" min="1" /><br>
     <button onclick="obfuscate()">Obfuscate</button>
     <button onclick="restore()">Restore</button>
     <button onclick="clearInput()">Clear Input</button>
@@ -34,12 +36,16 @@
         }
 
         function obfuscate() {
-            const inputText = document.getElementById('inputText').value;
-            let obfuscatedText = '';
-            for (const char of inputText) {
-                obfuscatedText += getRandomChineseCharacter() + char;
+            let inputText = document.getElementById('inputText').value;
+            const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
+            for (let j = 0; j < obfuscationCount; j++) {
+                let obfuscatedText = '';
+                for (const char of inputText) {
+                    obfuscatedText += getRandomChineseCharacter() + char;
+                }
+                inputText = obfuscatedText;
             }
-            document.getElementById('resultText').value = obfuscatedText;
+            document.getElementById('resultText').value = inputText;
         }
 
         function restore() {
