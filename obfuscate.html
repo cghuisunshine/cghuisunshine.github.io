@@ -23,6 +23,7 @@
     <button onclick="obfuscate()">Obfuscate</button>
     <button onclick="restore()">Restore</button>
     <button onclick="clearInput()">Clear Input</button>
+    <button onclick="moveResultToInput()">Move Result to Input</button>
     <h2>Result:</h2>
     <textarea id="resultText" readonly></textarea><br>
     <button onclick="copyResult()">Copy Result</button>
@@ -52,6 +53,11 @@
 
         function clearInput() {
             document.getElementById('inputText').value = '';
+        }
+
+        function moveResultToInput() {
+            const result = document.getElementById('resultText').value;
+            document.getElementById('inputText').value = result;
         }
 
         function copyResult() {
