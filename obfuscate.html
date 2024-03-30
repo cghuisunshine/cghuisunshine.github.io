@@ -66,7 +66,7 @@
 
 
 
-        function restore0() {
+        function restore() {
             const inputText = Array.from(document.getElementById('inputText').value);
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
             const skipCount = Math.pow(2, obfuscationCount) - 1;
@@ -79,25 +79,7 @@
             document.getElementById('resultText').value = restoredText;
         }
 
-        function restore() {
-            const inputText = Array.from(document.getElementById('inputText').value);
-            const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
-            let skipCount = Math.pow(2, obfuscationCount) - 1;
-            let restoredText = '';
-            let i = 0;
         
-            while (i < inputText.length) {
-                // Skip the inserted characters
-                i += skipCount;
-                // Check if the current index is within the bounds of the array
-                if (i < inputText.length) {
-                    restoredText += inputText[i];
-                    i++;  // Move to the next set of characters
-                }
-            }
-        
-            document.getElementById('resultText').value = restoredText;
-        }
 
 
 
