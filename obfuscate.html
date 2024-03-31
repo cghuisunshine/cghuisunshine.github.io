@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -76,6 +77,8 @@
             }
         
             document.getElementById('resultText').value = obfuscatedText;
+            navigator.clipboard.writeText(obfuscatedText);
+
         }
 
 
@@ -92,6 +95,8 @@
             }
         
             document.getElementById('resultText').value = restoredText;
+            navigator.clipboard.writeText(restoredText);
+
         }
 
         
