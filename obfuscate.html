@@ -65,7 +65,7 @@
         function obfuscate() {
             const inputText = Array.from(document.getElementById('inputText').value);
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
-            const insertCount = Math.pow(2, obfuscationCount) - 1;
+            const insertCount = obfuscationCount;
             let obfuscatedText = '';
         
             for (const char of inputText) {
@@ -84,7 +84,7 @@
         function restore() {
             const inputText = Array.from(document.getElementById('inputText').value);
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
-            const skipCount = Math.pow(2, obfuscationCount) - 1;
+            const skipCount = obfuscationCount;
             let restoredText = '';
         
             for (let i = skipCount; i < inputText.length; i += skipCount + 1) {
