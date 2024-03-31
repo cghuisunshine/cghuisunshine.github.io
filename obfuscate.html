@@ -16,6 +16,8 @@
             margin-right: 10px;
         }
     </style>
+    <script src="https://unpkg.com/grapheme-splitter/dist/grapheme-splitter.js"></script>
+
 </head>
 <body>
     <h1>Text Obfuscation and Restoration Tool</h1>
@@ -66,7 +68,7 @@
 
 
 
-        function restore() {
+        function restore0() {
             const inputText = Array.from(document.getElementById('inputText').value);
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
             const skipCount = Math.pow(2, obfuscationCount) - 1;
@@ -78,6 +80,21 @@
         
             document.getElementById('resultText').value = restoredText;
         }
+
+        function restore() {
+            const splitter = new GraphemeSplitter();
+            const inputText = splitter.splitGraphemes(document.getElementById('inputText').value);
+            const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
+            const skipCount = Math.pow(2, obfuscationCount) - 1;
+            let restoredText = '';
+        
+            for (let i = skipCount; i < inputText.length; i += skipCount + 1) {
+                restoredText += inputText[i];
+            }
+        
+            document.getElementById('resultText').value = restoredText;
+        }
+
 
         
 
