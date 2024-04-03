@@ -36,19 +36,6 @@
     <button onclick="copyResult()">Copy Result</button>
     <button onclick="moveResultToInput()">Move Result to Input</button>
     <script>
-
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            
-
-            const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-            const link = document.createElement('a');
-            link.download = 'dynamic-grid.png';
-            link.href = image;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-
        
         function getRandomCharacter() {
             const useEmoji = document.getElementById('useEmoji').checked;
@@ -140,9 +127,6 @@
 
         }
 
-
-
-
         function restore() {
             const inputText = Array.from(document.getElementById('inputText').value);
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
@@ -157,16 +141,6 @@
             navigator.clipboard.writeText(restoredText);
 
         }
-
-        
-
-
-        
-
-
-
-
-
 
         function clearInput() {
             document.getElementById('inputText').value = '';
