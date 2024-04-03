@@ -33,8 +33,51 @@
     <h2>Result:</h2>
     <textarea id="resultText" readonly></textarea><br>
     <button onclick="copyResult()">Copy Result</button>
+    <button id="downloadBtn">Save as Image</button>
     <button onclick="moveResultToInput()">Move Result to Input</button>
     <script>
+
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const text = document.getElementById('resultText').value; // Get text from textarea
+            if (!text) {
+                alert("Please enter some text in the textarea.");
+                return;
+            }
+
+            const gridSize = Math.ceil(Math.sqrt(text.length)); 
+            const cellSize = 60; // Define the size of each cell
+
+            const canvas = document.createElement('canvas');
+            canvas.width = cellSize * gridSize;
+            canvas.height = cellSize * gridSize;
+            const ctx = canvas.getContext('2d');
+
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const charIndex = i * gridSize + j;
+
+                    ctx.fillStyle = charIndex % 2 === 0 ? '#0000FF' : '#00FF00';
+                    ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+
+                    if (charIndex < text.length) {
+                        ctx.font = `${cellSize * 0.8}px Arial`;
+                        ctx.fillStyle = 'black';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(text[charIndex], j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);
+                    }
+                }
+            }
+
+            const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+            const link = document.createElement('a');
+            link.download = 'dynamic-grid.png';
+            link.href = image;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
        
         function getRandomCharacter() {
             const useEmoji = document.getElementById('useEmoji').checked;
