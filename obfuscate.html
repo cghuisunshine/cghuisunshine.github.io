@@ -32,7 +32,7 @@
     <button onclick="clearInput()">Clear Input</button>
     <h2>Result:</h2>
     <textarea id="resultText" readonly></textarea><br>
-    <div id="canvasContainer"></div>
+    <div id="imageContainer"></div>
     <button onclick="copyResult()">Copy Result</button>
     <button onclick="moveResultToInput()">Move Result to Input</button>
     <script>
@@ -99,19 +99,13 @@
                 return;
             }
 
-            // Check if a canvas already exists and remove it
-            const existingCanvas = document.querySelector('#canvasContainer canvas');
-            if (existingCanvas) {
-                existingCanvas.remove();
-            }
-
             const gridSize = Math.ceil(Math.sqrt(text.length)); 
             const cellSize = 60; // Define the size of each cell
 
             const canvas = document.createElement('canvas');
             canvas.width = cellSize * gridSize;
             canvas.height = cellSize * gridSize;
-            document.getElementById('canvasContainer').appendChild(canvas);
+            
             const ctx = canvas.getContext('2d');
 
             for (let i = 0; i < gridSize; i++) {
@@ -130,6 +124,19 @@
                     }
                 }
             }
+
+            // Convert canvas to image and display
+            const imageSrc = canvas.toDataURL("image/png");
+            const imageElement = document.createElement('img');
+            imageElement.src = imageSrc;
+
+            // Check if an image already exists and remove it
+            const existingImage = document.querySelector('#imageContainer img');
+            if (existingImage) {
+                existingImage.remove();
+            }
+
+            document.getElementById('imageContainer').appendChild(imageElement);
 
         }
 
