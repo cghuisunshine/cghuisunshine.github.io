@@ -32,6 +32,7 @@
     <button onclick="clearInput()">Clear Input</button>
     <h2>Result:</h2>
     <textarea id="resultText" readonly></textarea><br>
+    <div id="canvasContainer"></div>
     <button onclick="copyResult()">Copy Result</button>
     <button id="downloadBtn">Save as Image</button>
     <button onclick="moveResultToInput()">Move Result to Input</button>
@@ -42,6 +43,12 @@
             if (!text) {
                 alert("Please enter some text in the textarea.");
                 return;
+            }
+
+            // Check if a canvas already exists and remove it
+            const existingCanvas = document.querySelector('#canvasContainer canvas');
+            if (existingCanvas) {
+                existingCanvas.remove();
             }
 
             const gridSize = Math.ceil(Math.sqrt(text.length)); 
