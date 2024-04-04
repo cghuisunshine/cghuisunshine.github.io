@@ -34,8 +34,39 @@
     <textarea id="resultText" readonly></textarea><br>
     <button onclick="copyResult()">Copy Result</button>
     <button onclick="moveResultToInput()">Move Result to Input</button>
+    <button onclick="shareLink()">Share</button> 
     <div id="imageContainer"></div>
     <script>
+
+        function shareLink() {
+            const inputText = document.getElementById('inputText').value;
+            const baseUrl = window.location.href.split('?')[0]; // Get the base URL without query parameters
+            const url = inputText ? `${baseUrl}?text=${encodeURIComponent(inputText)}` : baseUrl;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Text Obfuscation Tool',
+                    url: url
+                }).then(() => {
+                    console.log('Thanks for sharing!');
+                }).catch(console.error);
+            } else {
+                // If the Web Share API is not available, display the URL for manual sharing
+                alert(`Copy this link to share: ${url}`);
+            }
+        }
+
+        // Function to parse the query string and pre-fill the input text
+        function loadQueryText() {
+            const params = new URLSearchParams(window.location.search);
+            const text = params.get('text');
+            if (text) {
+                document.getElementById('inputText').value = decodeURIComponent(text);
+            }
+        }
+
+        // Call the function on page load to check for query parameters
+        window.onload = loadQueryText;
        
         function getRandomCharacter() {
             const useEmoji = document.getElementById('useEmoji').checked;
