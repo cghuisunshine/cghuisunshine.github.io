@@ -39,9 +39,13 @@
     <script>
 
         function shareLink() {
-            const inputText = document.getElementById('inputText').value;
+            let text = document.getElementById('resultText').value;
+            if (!text) {
+                text = document.getElementById('inputText').value;
+            }
+        
             const baseUrl = window.location.href.split('?')[0]; // Get the base URL without query parameters
-            const url = inputText ? `${baseUrl}?text=${encodeURIComponent(inputText)}` : baseUrl;
+            const url = text ? `${baseUrl}?text=${encodeURIComponent(text)}` : baseUrl;
             
             if (navigator.share) {
                 navigator.share({
@@ -55,6 +59,7 @@
                 alert(`Copy this link to share: ${url}`);
             }
         }
+
 
         // Function to parse the query string and pre-fill the input text
         function loadQueryText() {
