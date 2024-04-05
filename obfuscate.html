@@ -30,6 +30,9 @@
     <button onclick="obfuscate()">Obfuscate</button>
     <button onclick="restore()">Restore</button>
     <button onclick="clearInput()">Clear Input</button>
+    <button onclick="restoreMoveAndObfuscate()">Restore, Move & Obfuscate</button>
+
+
     <h2>Result:</h2>
     <textarea id="resultText" readonly></textarea><br>
     <button onclick="copyResult()">Copy Result</button>
@@ -190,6 +193,12 @@
             document.getElementById('inputText').value = result;
             document.getElementById('resultText').value = ''; // Clearing the result after moving
         }
+        function restoreMoveAndObfuscate() {
+            restore(); // 调用恢复函数
+            moveResultToInput(); // 将结果移动到输入框
+            obfuscate(); // 调用混淆函数
+        }
+
 
         function copyResult() {
             const resultText = document.getElementById('resultText');
