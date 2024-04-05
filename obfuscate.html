@@ -106,7 +106,7 @@
             const insertCount = obfuscationCount;
             let obfuscatedText = '';
         
-            const characters = Array.from(inputText);
+            const characters = inputText;
             for (const char of characters) {
                 for (let i = 0; i < obfuscationCount; i++) {
                     obfuscatedText += getRandomCharacter();  
