@@ -106,9 +106,10 @@
             const insertCount = obfuscationCount;
             let obfuscatedText = '';
         
-            for (const char of inputText) {
-                for (let i = 0; i < insertCount; i++) {
-                    obfuscatedText += getRandomCharacter();
+            const characters = Array.from(inputText);
+            for (const char of characters) {
+                for (let i = 0; i < obfuscationCount; i++) {
+                    obfuscatedText += getRandomChineseCharacter();  // 假设这个函数返回随机汉字
                 }
                 obfuscatedText += char;
             }
