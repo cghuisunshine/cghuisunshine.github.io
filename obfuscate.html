@@ -143,7 +143,7 @@
                     ctx.fillStyle = charIndex % 2 === 0 ? '#0000FF' : '#00FF00';
                     ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
         
-                    if (charIndex < text.length) {
+                    if (charIndex < characters.length) {
                         ctx.fillStyle = 'black';
                         ctx.font = `${cellSize * 0.8}px Arial`;
                         ctx.textAlign = 'center';
