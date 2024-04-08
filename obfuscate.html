@@ -168,10 +168,12 @@
                 for (let j = 0; j < gridSize; j++) {
                     const charIndex = i * gridSize + j;
         
-                    ctx.fillStyle = charIndex % 2 === 0 ? '#00007F' : '#00FF00';
-                    ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+                    
         
                     if (charIndex < characters.length) {
+                        ctx.fillStyle = charIndex % 2 === 0 ? '#00007F' : '#00FF00';
+                        ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+                        
                         ctx.fillStyle = 'black';
                         ctx.font = `${cellSize * 0.8}px Arial`;
                         ctx.textAlign = 'center';
@@ -179,15 +181,18 @@
                         ctx.fillText(characters[charIndex], j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);
                     }
                     else {
+                        ctx.fillStyle = '#00007F';
+                        ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+                        
                         let random_char;
-                        if (charIndex % 2 === 0) {
+                        //if (charIndex % 2 === 0) {
                             random_char = getRandomCharacter();
                             ctx.fillStyle = 'black';
                             ctx.font = `${cellSize * 0.8}px Arial`;
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
                             ctx.fillText(random_char, j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);
-                        }
+                        //}
                         // else {
                         //     random_char = getRandomCharacter2(true);
                         // }
