@@ -179,11 +179,12 @@
                         ctx.fillText(characters[charIndex], j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);
                     }
                     else {
+                        let random_char;
                         if (charIndex % 2 === 0) {
-                            let random_char = getRandomCharacter();
+                            random_char = getRandomCharacter();
                         }
                         else {
-                            let random_char = getRandomCharacter2(true);
+                            random_char = getRandomCharacter2(true);
                         }
                         ctx.fillStyle = 'black';
                         ctx.font = `${cellSize * 0.8}px Arial`;
