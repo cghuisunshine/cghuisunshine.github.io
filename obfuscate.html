@@ -182,15 +182,16 @@
                         let random_char;
                         if (charIndex % 2 === 0) {
                             random_char = getRandomCharacter();
+                            ctx.fillStyle = 'black';
+                            ctx.font = `${cellSize * 0.8}px Arial`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(random_char, j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);
                         }
-                        else {
-                            random_char = getRandomCharacter2(true);
-                        }
-                        ctx.fillStyle = 'black';
-                        ctx.font = `${cellSize * 0.8}px Arial`;
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(random_char, j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);            
+                        // else {
+                        //     random_char = getRandomCharacter2(true);
+                        // }
+                                    
                 }
                 }
             }
