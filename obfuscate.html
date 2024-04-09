@@ -68,10 +68,16 @@
         function loadQueryText() {
             const params = new URLSearchParams(window.location.search);
             const text = params.get('text');
+            const operation = params.get('operation');
+        
             if (text) {
                 document.getElementById('inputText').value = decodeURIComponent(text);
+                if (operation === 'obfuscate') {
+                    obfuscate();
+                }
             }
         }
+
 
         // Call the function on page load to check for query parameters
         window.onload = loadQueryText;
