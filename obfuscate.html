@@ -48,7 +48,7 @@
         
             if (text) {
                 // If there's text in the resultText, assume operation is 'obfuscate'
-                url += `?operation=obfuscate&text=${encodeURIComponent(text)}`;
+                url += `?operation=restore&text=${encodeURIComponent(text)}`;
             } else {
                 // If resultText is empty, use the inputText without the operation parameter
                 text = document.getElementById('inputText').value;
