@@ -43,13 +43,20 @@
 
         function shareLink() {
             let text = document.getElementById('resultText').value;
-            if (!text) {
+            const baseUrl = window.location.href.split('?')[0]; // Get the base URL without query parameters
+            let url = baseUrl;
+        
+            if (text) {
+                // If there's text in the resultText, assume operation is 'obfuscate'
+                url += `?operation=obfuscate&text=${encodeURIComponent(text)}`;
+            } else {
+                // If resultText is empty, use the inputText without the operation parameter
                 text = document.getElementById('inputText').value;
+                if (text) {
+                    url += `?text=${encodeURIComponent(text)}`;
+                }
             }
         
-            const baseUrl = window.location.href.split('?')[0]; // Get the base URL without query parameters
-            const url = text ? `${baseUrl}?text=${encodeURIComponent(text)}` : baseUrl;
-            
             if (navigator.share) {
                 navigator.share({
                     title: 'Text Obfuscation Tool',
@@ -64,6 +71,7 @@
         }
 
 
+
         // Function to parse the query string and pre-fill the input text
         function loadQueryText() {
             const params = new URLSearchParams(window.location.search);
@@ -74,6 +82,8 @@
                 document.getElementById('inputText').value = decodeURIComponent(text);
                 if (operation === 'obfuscate') {
                     obfuscate();
+                } else if (operation === 'restore') {
+                    restore();
                 }
             }
         }
