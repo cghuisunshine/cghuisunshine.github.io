@@ -53,6 +53,8 @@
                 // If resultText is empty, use the inputText without the operation parameter
                 text = document.getElementById('inputText').value;
                 if (text) {
+                    url += `?operation=obfuscate&text=${encodeURIComponent(text)}`;
+                } else {
                     url += `?text=${encodeURIComponent(text)}`;
                 }
             }
