@@ -92,7 +92,17 @@
 
 
         // Call the function on page load to check for query parameters
-        window.onload = loadQueryText;
+        window.onload = function() {
+            loadQueryText();
+        
+            const inputTextValue = document.getElementById('inputText').value;
+            const resultTextValue = document.getElementById('resultText').value;
+        
+            if (!inputTextValue && !resultTextValue) {
+                document.getElementById('inputText').focus();
+            }
+        };
+
        
         function getRandomCharacter() {
             const useEmoji = document.getElementById('useEmoji').checked;
