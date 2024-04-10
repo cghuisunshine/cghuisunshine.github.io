@@ -29,10 +29,19 @@
             max-width: 500px; /* Limits the width on larger screens */
             margin-bottom: 10px;
         }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            max-width: 500px; /* Matches the max width of the text area */
+        }
         button {
+            margin: 5px;
+        }
+/*         button {
             width: auto;
             padding: 10px;
-        }
+        } */
         #imageContainer img {
             width: 100%;
             height: auto;
@@ -63,17 +72,21 @@
     <input type="number" id="obfuscationCount" value="1" min="1" style="display: none;" />
     <label for="useEmoji" style="display: none;">Use Emoji for Obfuscation:</label>
     <input type="checkbox" id="useEmoji" style="display: none;" />
-    <button onclick="obfuscate()">Obfuscate</button>
-    <button onclick="restore()">Restore</button>
-    <button onclick="clearInput()">Clear Input</button>
+    <div class="button-container">
+        <button onclick="obfuscate()">Obfuscate</button>
+        <button onclick="restore()">Restore</button>
+        <button onclick="clearInput()">Clear Input</button>
+    </div>
     <button onclick="restoreMoveAndObfuscate()">Restore, Move & Obfuscate</button>
 
 
     <h2>Result:</h2>
     <textarea id="resultText" readonly></textarea><br>
-    <button onclick="copyResult()">Copy Result</button>
-    <button onclick="shareLink()">ShareLink</button>
-    <button onclick="moveResultToInput()">Move Result to Input</button>
+    <div class="button-container">
+        <button onclick="copyResult()">Copy Result</button>
+        <button onclick="shareLink()">Share Link</button>
+        <button onclick="moveResultToInput()">Move Result to Input</button>
+    </div>
     <div id="imageContainer"></div>
     <script>
 
