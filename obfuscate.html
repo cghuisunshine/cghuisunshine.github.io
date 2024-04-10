@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Text Obfuscation and Restoration Tool</title>
-    <style>
+<!--     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -16,7 +16,43 @@
         button {
             margin-right: 10px;
         }
+    </style> -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        textarea, button, input[type="number"] {
+            width: 100%;
+            max-width: 500px; /* Limits the width on larger screens */
+            margin-bottom: 10px;
+        }
+        button {
+            width: auto;
+            padding: 10px;
+        }
+        #imageContainer img {
+            width: 100%;
+            height: auto;
+        }
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 600px) {
+            body {
+                margin: 10px;
+            }
+            textarea, button, input[type="number"] {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            button {
+                padding: 5px;
+            }
+        }
     </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     
 
 </head>
