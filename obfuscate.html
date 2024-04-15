@@ -65,33 +65,29 @@
 
 
     <h2>Result:</h2>
-    <textarea id="resultText" readonly></textarea><br>
+<!--     <textarea id="resultText" readonly></textarea><br> -->
     <div class="button-container">
         <button onclick="copyResult()">CopyResult</button>
         <button onclick="shareLink()">ShareLink</button>
-        <button onclick="moveResultToInput()">Result2Input</button>
+<!--         <button onclick="moveResultToInput()">Result2Input</button> -->
     </div>
     <div id="imageContainer"></div>
     <script>
 
         function shareLink() {
-            let text = document.getElementById('resultText').value;
+            let text = document.getElementById('inputText').value;
             const baseUrl = window.location.href.split('?')[0]; // Get the base URL without query parameters
             let url = baseUrl;
         
+            
+            // If resultText is empty, use the inputText without the operation parameter
+            text = document.getElementById('inputText').value;
             if (text) {
-                // If there's text in the resultText, assume operation is 'obfuscate'
-                url += `?operation=restore&text=${encodeURIComponent(text)}`;
+                url += `?operation=obfuscate&text=${encodeURIComponent(text)}`;
             } else {
-                // If resultText is empty, use the inputText without the operation parameter
-                text = document.getElementById('inputText').value;
-                if (text) {
-                    url += `?operation=obfuscate&text=${encodeURIComponent(text)}`;
-                } else {
-                    url += `?text=${encodeURIComponent(text)}`;
-                }
+                url += `?text=${encodeURIComponent(text)}`;
             }
-        
+            
             if (navigator.share) {
                 navigator.share({
                     title: 'Text Obfuscation Tool',
@@ -129,9 +125,9 @@
             loadQueryText();
         
             const inputTextValue = document.getElementById('inputText').value;
-            const resultTextValue = document.getElementById('resultText').value;
+            // const resultTextValue = document.getElementById('resultText').value;
         
-            if (!inputTextValue && !resultTextValue) {
+            if (!inputTextValue) {
                 document.getElementById('inputText').focus();
             }
         };
@@ -203,14 +199,16 @@
                 obfuscatedText += char;
             }
         
-            document.getElementById('resultText').value = obfuscatedText;
+            // document.getElementById('resultText').value = obfuscatedText;
+            document.getElementById('inputText').value = obfuscatedText;
+
             navigator.clipboard.writeText(obfuscatedText);
 
-            const text = document.getElementById('resultText').value; // Get text from textarea
-            if (!text) {
-                alert("Please enter some text in the textarea.");
-                return;
-            }
+            // const text = document.getElementById('resultText').value; // Get text from textarea
+            // if (!text) {
+            //     alert("Please enter some text in the textarea.");
+            //     return;
+            // }
 
             generateGrid(obfuscatedText);
 
@@ -285,7 +283,8 @@
                 restoredText += inputText[i];
             }
         
-            document.getElementById('resultText').value = restoredText;
+            // document.getElementById('resultText').value = restoredText;
+            document.getElementById('inputText').value = restoredText;
             navigator.clipboard.writeText(restoredText);
 
             document.getElementById('imageContainer').innerHTML = '';
@@ -294,17 +293,17 @@
 
         function clearInput() {
             document.getElementById('inputText').value = '';
-            document.getElementById('resultText').value = '';
+            // document.getElementById('resultText').value = '';
             document.getElementById('imageContainer').innerHTML = '';
 
         }
 
-        function moveResultToInput() {
-            const result = document.getElementById('resultText').value;
-            document.getElementById('inputText').value = result;
-            document.getElementById('resultText').value = ''; // Clearing the result after moving
-            document.getElementById('imageContainer').innerHTML = '';
-        }
+        // function moveResultToInput() {
+        //     const result = document.getElementById('resultText').value;
+        //     document.getElementById('inputText').value = result;
+        //     document.getElementById('resultText').value = ''; // Clearing the result after moving
+        //     document.getElementById('imageContainer').innerHTML = '';
+        // }
         function restoreMoveAndObfuscate() {
             restore(); // 调用恢复函数
             moveResultToInput(); // 将结果移动到输入框
