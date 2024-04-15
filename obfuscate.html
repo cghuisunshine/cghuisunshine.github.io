@@ -212,6 +212,9 @@
          }
 
          function generateGrid(text) {
+
+            if (!text) return; 
+            
             const characters = Array.from(text);
             const gridSize = Math.ceil(Math.sqrt(characters.length));
             const cellSize = 60; // 单元格大小
