@@ -313,7 +313,7 @@
 
 
         function copyResult() {
-            const resultText = document.getElementById('resultText');
+            const resultText = document.getElementById('inputText');
             resultText.select();
             resultText.setSelectionRange(0, 99999); // For mobile devices
             navigator.clipboard.writeText(resultText.value);
