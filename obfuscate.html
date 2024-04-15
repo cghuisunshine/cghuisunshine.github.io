@@ -201,12 +201,6 @@
 
             navigator.clipboard.writeText(obfuscatedText);
 
-            // const text = document.getElementById('resultText').value; // Get text from textarea
-            // if (!text) {
-            //     alert("Please enter some text in the textarea.");
-            //     return;
-            // }
-
             generateGrid(obfuscatedText);
 
          }
@@ -244,18 +238,13 @@
                         ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
                         
                         let random_char;
-                        //if (charIndex % 2 === 0) {
-                            random_char = getRandomCharacter();
-                            ctx.fillStyle = 'black';
-                            ctx.font = `${cellSize * 0.8}px Arial`;
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText(random_char, j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);
-                        //}
-                        // else {
-                        //     random_char = getRandomCharacter2(true);
-                        // }
-                                    
+                        random_char = getRandomCharacter();
+                        ctx.fillStyle = 'black';
+                        ctx.font = `${cellSize * 0.8}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(random_char, j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);
+                
                 }
                 }
             }
@@ -295,15 +284,11 @@
             document.getElementById('inputText').value = '';
             // document.getElementById('resultText').value = '';
             document.getElementById('imageContainer').innerHTML = '';
+            document.getElementById('inputText').focus(); 
 
         }
 
-        // function moveResultToInput() {
-        //     const result = document.getElementById('resultText').value;
-        //     document.getElementById('inputText').value = result;
-        //     document.getElementById('resultText').value = ''; // Clearing the result after moving
-        //     document.getElementById('imageContainer').innerHTML = '';
-        // }
+        
         function restoreMoveAndObfuscate() {
             restore(); // 调用恢复函数
             moveResultToInput(); // 将结果移动到输入框
