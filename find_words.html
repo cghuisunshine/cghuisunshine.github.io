@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Word Frequency Counter</title>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadDictionary().then(wordsFreqDict => {
+        const form = document.getElementById('frequencyForm');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const textInput = document.getElementById('text').value;
+            const threshold = parseInt(document.getElementById('threshold').value);
+            const includeNotFound = document.getElementById('includeNotFound').checked;
+            processText(textInput, threshold, includeNotFound, wordsFreqDict);
+        });
+    });
+});
+
+async function loadDictionary() {
+    const response = await fetch('words_freq.txt');
+    const text = await response.text();
+    const lines = text.split('\n');
+    const wordsFreqDict = {};
+    lines.forEach(line => {
+        const parts = line.trim().split(/\s+/);
+        if (parts.length === 2) {
+            const word = parts[0];
+            const frequency = parseInt(parts[1], 10);
+            if (!isNaN(frequency)) {
+                wordsFreqDict[word] = frequency;
+            }
+        }
+    });
+    return wordsFreqDict;
+}
+
+function processText(inputText, threshold, includeNotFound, wordsFreqDict) {
+    const words = inputText.toLowerCase().replace(/[^a-z-]+/g, ' ').split(/\s+/);
+    const wordsSet = new Set();
+    const wordsList = [];
+    words.forEach(word => {
+        if (word.length >= 3 && !wordsSet.has(word)) {
+            if (!wordsFreqDict.hasOwnProperty(word) && includeNotFound) {
+                wordsSet.add(word);
+                wordsList.push(word);
+            } else if (wordsFreqDict[word] && wordsFreqDict[word] >= threshold) {
+                wordsSet.add(word);
+                wordsList.push(word);
+            }
+        }
+    });
+    displayResults(wordsList);
+}
+
+function displayResults(wordsList) {
+    const resultsArea = document.getElementById('results');
+    resultsArea.innerHTML = wordsList.join(', ');
+}
+</script>
+</head>
+<body>
+<form id="frequencyForm">
+    <textarea id="text"></textarea><br>
+    <input type="number" id="threshold" value="10000"><br>
+    <label><input type="checkbox" id="includeNotFound"> Include Not Found</label><br>
+    <button type="submit">Analyze Text</button>
+</form>
+<div id="results"></div>
+</body>
+</html>
