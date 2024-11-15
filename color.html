@@ -18,7 +18,6 @@
     #content {
       max-width: 800px;
       text-align: justify;
-      user-select: none; /* Disable default selection */
     }
     .color-setting {
       margin: 10px 0;
@@ -34,9 +33,6 @@
     input[type="text"] {
       width: 80px;
       text-align: center;
-    }
-    .highlighted {
-      color: #ff0000;
     }
   </style>
 </head>
@@ -79,10 +75,6 @@
     const paragraph = document.getElementById('paragraph');
 
     const defaultParagraphContent = paragraph.innerHTML;
-
-    let selectionStart = 0;
-    let selectionEnd = 0;
-    let isSelecting = false;
 
     // Save colors and highlighted text to localStorage
     function saveState() {
@@ -141,45 +133,7 @@
     // Apply highlight color
     syncColorInput(highlightColorPicker, highlightColorHex, () => {});
 
-    // Custom selection handling for touch devices
-    paragraph.addEventListener('touchstart', (e) => {
-      isSelecting = true;
-      const touch = e.touches[0];
-      const position = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-      if (position) {
-        selectionStart = position.startOffset;
-      }
-      e.preventDefault();
-    });
-
-    paragraph.addEventListener('touchmove', (e) => {
-      if (isSelecting) {
-        const touch = e.touches[0];
-        const position = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-        if (position) {
-          selectionEnd = position.endOffset;
-        }
-      }
-      e.preventDefault();
-    });
-
-    paragraph.addEventListener('touchend', () => {
-      isSelecting = false;
-      if (selectionStart !== selectionEnd) {
-        applyHighlight(selectionStart, selectionEnd);
-        saveState();
-      }
-    });
-
-    // Apply highlight to selected text
-    function applyHighlight(start, end) {
-      const text = paragraph.textContent;
-      const highlightedText = `<span style="color: ${highlightColorPicker.value}">${text.slice(start, end)}</span>`;
-      const newHTML = text.slice(0, start) + highlightedText + text.slice(end);
-      paragraph.innerHTML = newHTML;
-    }
-
-    // Highlight selected text button click handler for desktop
+    // Highlight selected text
     applyHighlightButton.addEventListener('click', () => {
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
