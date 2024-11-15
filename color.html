@@ -14,7 +14,6 @@
       align-items: center;
       justify-content: flex-start;
       height: 100vh;
-      user-select: none; /* Disable native text selection */
     }
     #content {
       max-width: 800px;
@@ -34,9 +33,6 @@
     input[type="text"] {
       width: 80px;
       text-align: center;
-    }
-    span.highlight {
-      background-color: yellow; /* Highlight color, can be dynamic based on picker */
     }
   </style>
 </head>
@@ -63,6 +59,13 @@
   <div id="content">
     <p id="paragraph">
         Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+        <br>      
+        <br>
+        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
     </p>
   </div>
 
@@ -78,8 +81,16 @@
     const resetHighlightsButton = document.getElementById('resetHighlights');
     const paragraph = document.getElementById('paragraph');
 
-    // Initial default content backup for reset functionality
-    const defaultParagraphContent = paragraph.innerHTML;
+    const defaultParagraphContent = `
+      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+      <br>      
+      <br>
+      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
+    `;
 
     // Save colors and highlighted text to localStorage
     function saveState() {
@@ -96,6 +107,7 @@
       const highlightColor = localStorage.getItem('highlightColor') || '#ff0000';
       const savedParagraphHTML = localStorage.getItem('paragraphHTML') || defaultParagraphContent;
 
+      // Apply saved settings
       document.body.style.backgroundColor = bgColor;
       bgColorPicker.value = bgColor;
       bgColorHex.value = bgColor;
@@ -134,56 +146,31 @@
       paragraph.style.color = color;
     });
 
-    // Custom touch-based text selection
-    document.addEventListener('touchstart', handleTouchStart, false);
-    document.addEventListener('touchmove', handleTouchMove, false);
-    document.addEventListener('touchend', handleTouchEnd, false);
+    // Apply highlight color
+    syncColorInput(highlightColorPicker, highlightColorHex, () => {});
 
-    let touchStartPos = null;
-    let touchEndPos = null;
-
-    function handleTouchStart(e) {
-      touchStartPos = getTouchPosition(e.touches[0]);
-    }
-
-    function handleTouchMove(e) {
-      touchEndPos = getTouchPosition(e.touches[0]);
-    }
-
-    function handleTouchEnd(e) {
-      if (touchStartPos && touchEndPos) {
-        highlightText(touchStartPos, touchEndPos);
-      }
-      touchStartPos = null;
-      touchEndPos = null;
-    }
-
-    function getTouchPosition(touch) {
-      const range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-      return range ? range.startOffset : null;
-    }
-
-    function highlightText(start, end) {
-      if (!start || !end) return;
-      const range = new Range();
-      range.setStart(paragraph.firstChild, start);
-      range.setEnd(paragraph.firstChild, end);
-
+    // Highlight selected text
+    applyHighlightButton.addEventListener('click', () => {
       const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const span = document.createElement('span');
+        span.style.color = highlightColorPicker.value;
+        span.textContent = range.toString();
 
-      const span = document.createElement('span');
-      span.className = 'highlight';
-      span.style.backgroundColor = highlightColorPicker.value;
-      span.textContent = selection.toString();
+        range.deleteContents();
+        range.insertNode(span);
 
-      range.deleteContents();
-      range.insertNode(span);
-      saveState();
-    }
+        saveState();
 
-    // Reset highlights
+        // Clear the selection
+        selection.removeAllRanges();
+      } else {
+        alert('Please select text to highlight!');
+      }
+    });
+
+    // Reset all highlights
     resetHighlightsButton.addEventListener('click', () => {
       paragraph.innerHTML = defaultParagraphContent;
       saveState();
@@ -195,7 +182,9 @@
       saveState();
     });
 
+    // Load state when the page loads
     loadState();
   </script>
 </body>
 </html>
+
