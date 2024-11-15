@@ -18,6 +18,7 @@
     #content {
       max-width: 800px;
       text-align: justify;
+      user-select: none; /* Disable default selection */
     }
     .color-setting {
       margin: 10px 0;
@@ -33,6 +34,9 @@
     input[type="text"] {
       width: 80px;
       text-align: center;
+    }
+    .highlighted {
+      color: red;
     }
   </style>
 </head>
@@ -74,7 +78,9 @@
     const resetHighlightsButton = document.getElementById('resetHighlights');
     const paragraph = document.getElementById('paragraph');
 
-    const defaultParagraphContent = paragraph.innerHTML;
+    let isSelecting = false;
+    let selectionStart = null;
+    let selectionEnd = null;
 
     // Save colors and highlighted text to localStorage
     function saveState() {
@@ -89,7 +95,7 @@
       const bgColor = localStorage.getItem('bgColor') || '#ffffff';
       const textColor = localStorage.getItem('textColor') || '#000000';
       const highlightColor = localStorage.getItem('highlightColor') || '#ff0000';
-      const savedParagraphHTML = localStorage.getItem('paragraphHTML') || defaultParagraphContent;
+      const savedParagraphHTML = localStorage.getItem('paragraphHTML') || paragraph.innerHTML;
 
       // Apply saved settings
       document.body.style.backgroundColor = bgColor;
@@ -133,30 +139,55 @@
     // Apply highlight color
     syncColorInput(highlightColorPicker, highlightColorHex, () => {});
 
-    // Highlight selected text
+    // Handle custom text selection
+    paragraph.addEventListener('touchstart', (e) => {
+      isSelecting = true;
+      const touch = e.touches[0];
+      const position = getCaretPosition(touch.clientX, touch.clientY);
+      if (position !== null) {
+        selectionStart = position;
+      }
+    });
+
+    paragraph.addEventListener('touchmove', (e) => {
+      if (isSelecting) {
+        const touch = e.touches[0];
+        const position = getCaretPosition(touch.clientX, touch.clientY);
+        if (position !== null) {
+          selectionEnd = position;
+        }
+      }
+    });
+
+    paragraph.addEventListener('touchend', () => {
+      isSelecting = false;
+    });
+
+    function getCaretPosition(x, y) {
+      const range = document.caretRangeFromPoint(x, y);
+      if (range) {
+        return range.startOffset;
+      }
+      return null;
+    }
+
     applyHighlightButton.addEventListener('click', () => {
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const span = document.createElement('span');
-        span.style.color = highlightColorPicker.value;
-        span.textContent = range.toString();
-
-        range.deleteContents();
-        range.insertNode(span);
-
+      if (selectionStart !== null && selectionEnd !== null && selectionStart !== selectionEnd) {
+        const content = paragraph.textContent;
+        const start = Math.min(selectionStart, selectionEnd);
+        const end = Math.max(selectionStart, selectionEnd);
+        const highlightedText = `<span style="color: ${highlightColorPicker.value}">${content.slice(start, end)}</span>`;
+        paragraph.innerHTML = content.slice(0, start) + highlightedText + content.slice(end);
         saveState();
-
-        // Clear the selection
-        selection.removeAllRanges();
+        selectionStart = null;
+        selectionEnd = null;
       } else {
         alert('Please select text to highlight!');
       }
     });
 
-    // Reset all highlights
     resetHighlightsButton.addEventListener('click', () => {
-      paragraph.innerHTML = defaultParagraphContent;
+      paragraph.innerHTML = paragraph.textContent; // Reset paragraph content
       saveState();
     });
 
