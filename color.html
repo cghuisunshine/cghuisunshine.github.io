@@ -34,14 +34,6 @@
       width: 80px;
       text-align: center;
     }
-    /* Added CSS to enable text selection on iPhone */
-    #paragraph {
-      -webkit-user-select: text;       /* Safari */
-      -moz-user-select: text;          /* Firefox */
-      -ms-user-select: text;           /* Internet Explorer/Edge */
-      user-select: text;               /* Standard */
-      -webkit-touch-callout: default;  /* iOS Safari */
-    }
   </style>
 </head>
 <body>
@@ -67,13 +59,6 @@
   <div id="content">
     <p id="paragraph">
         Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-        <br>      
-        <br>
-        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-        Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
     </p>
   </div>
 
@@ -89,17 +74,6 @@
     const resetHighlightsButton = document.getElementById('resetHighlights');
     const paragraph = document.getElementById('paragraph');
 
-    const defaultParagraphContent = `
-      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-      <br>      
-      <br>
-      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-      Once upon a time, in a small village nestled among rolling hills and vast forests, lived a young girl named Ella. She spent her days exploring the woods, listening to the whisper of leaves in the wind, and marveling at the beauty of nature. Her heart was filled with curiosity, and her dreams stretched beyond the horizon.
-    `;
-
     // Save colors and highlighted text to localStorage
     function saveState() {
       localStorage.setItem('bgColor', bgColorPicker.value);
@@ -113,7 +87,7 @@
       const bgColor = localStorage.getItem('bgColor') || '#ffffff';
       const textColor = localStorage.getItem('textColor') || '#000000';
       const highlightColor = localStorage.getItem('highlightColor') || '#ff0000';
-      const savedParagraphHTML = localStorage.getItem('paragraphHTML') || defaultParagraphContent;
+      const savedParagraphHTML = localStorage.getItem('paragraphHTML') || paragraph.textContent;
 
       // Apply saved settings
       document.body.style.backgroundColor = bgColor;
@@ -162,23 +136,17 @@
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
+        const span = document.createElement('span');
+        span.style.color = highlightColorPicker.value;
+        span.textContent = range.toString();
 
-        // Ensure the selection is within the paragraph
-        if (paragraph.contains(range.commonAncestorContainer) || range.commonAncestorContainer === paragraph) {
-          const span = document.createElement('span');
-          span.style.color = highlightColorPicker.value;
-          span.textContent = range.toString();
+        range.deleteContents();
+        range.insertNode(span);
 
-          range.deleteContents();
-          range.insertNode(span);
+        saveState();
 
-          saveState();
-
-          // Clear the selection
-          selection.removeAllRanges();
-        } else {
-          alert('Please select text within the paragraph!');
-        }
+        // Clear the selection
+        selection.removeAllRanges();
       } else {
         alert('Please select text to highlight!');
       }
@@ -186,7 +154,7 @@
 
     // Reset all highlights
     resetHighlightsButton.addEventListener('click', () => {
-      paragraph.innerHTML = defaultParagraphContent;
+      paragraph.innerHTML = paragraph.textContent;
       saveState();
     });
 
