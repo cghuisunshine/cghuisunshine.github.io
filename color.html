@@ -165,10 +165,11 @@ document.getElementById('paragraph').addEventListener('touchend', function(e) {
 
 
     // Highlight selected text
-    applyHighlightButton.addEventListener('click', () => {
-      event.preventDefault();
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
+   applyHighlightButton.addEventListener('click', (event) => {
+    event.preventDefault(); // Correct usage of event to prevent default button behavior
+
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         const span = document.createElement('span');
         span.style.color = highlightColorPicker.value;
@@ -181,19 +182,21 @@ document.getElementById('paragraph').addEventListener('touchend', function(e) {
 
         // Clear the selection
         selection.removeAllRanges();
-      } else {
-
+    } else {
         if (savedRange !== null) {
-          const span = document.createElement('span');
-          span.style.color = document.getElementById('highlightColorPicker').value; // Use color from picker
-          span.appendChild(savedRange.extractContents()); // Move the selected text into the span
-          savedRange.insertNode(span); // Insert the span at the range location in the DOM
-      
-          savedRange = null; // Clear the stored range after applying highlight
-          } else {
-          alert('Please select text to highlight!');
+            const span = document.createElement('span');
+            span.style.color = document.getElementById('highlightColorPicker').value; // Use color from picker
+            span.appendChild(savedRange.extractContents()); // Move the selected text into the span
+            savedRange.insertNode(span); // Insert the span at the range location in the DOM
+
+            savedRange = null; // Clear the stored range after applying highlight
+            saveState();
+        } else {
+            alert('Please select text to highlight!');
         }
-      });
+    }
+});
+
 
     // Reset all highlights
     resetHighlightsButton.addEventListener('click', () => {
