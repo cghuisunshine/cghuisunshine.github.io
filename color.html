@@ -151,6 +151,7 @@
 
     // Highlight selected text
     applyHighlightButton.addEventListener('click', () => {
+      event.preventDefault();
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
