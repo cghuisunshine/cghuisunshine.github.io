@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT Browser App</title>
+    <title>SearchResult Browser App</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
@@ -18,10 +18,7 @@
             position: relative;
             overflow-x: auto;
         }
-        code {
-            font-family: monospace;
-            color: #d6336c;
-        }
+        code { font-family: monospace; color: #d6336c; }
         .copy-button {
             position: absolute;
             top: 5px;
@@ -35,18 +32,28 @@
             cursor: pointer;
         }
         textarea { width: 100%; height: 100px; }
-        button, select { display: block; margin-top: 10px; padding: 10px 20px; }
-        #apiKeyWrapper { margin-bottom: 20px; }
+        button, select { margin-top: 10px; padding: 10px 20px; }
+        #apiKeyWrapper, #modelSelectWrapper {
+            display: none; /* Hidden by default, shown when hamburger is clicked */
+            margin-bottom: 20px;
+        }
+        #hamburgerMenu {
+            font-size: 24px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
+    <div id="hamburgerMenu">☰</div>
+
     <div id="apiKeyWrapper">
         <label for="apiKey">OpenAI API Key:</label>
         <input type="password" id="apiKey" placeholder="Enter your API key" />
         <button onclick="saveApiKey()">Save API Key</button>
     </div>
 
-    <div>
+    <div id="modelSelectWrapper">
         <label for="modelSelect">Select Model:</label>
         <select id="modelSelect">
             <option value="gpt-4o-mini" selected>gpt-4o-mini (Default)</option>
@@ -61,7 +68,17 @@
     </div>
 
     <script>
-        // Function to save API key to localStorage
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const apiKeyWrapper = document.getElementById('apiKeyWrapper');
+        const modelSelectWrapper = document.getElementById('modelSelectWrapper');
+
+        // Toggle the visibility of the API key and model selection on hamburger click
+        hamburgerMenu.addEventListener('click', () => {
+            const isVisible = apiKeyWrapper.style.display === 'block';
+            apiKeyWrapper.style.display = isVisible ? 'none' : 'block';
+            modelSelectWrapper.style.display = isVisible ? 'none' : 'block';
+        });
+
         function saveApiKey() {
             const apiKey = document.getElementById('apiKey').value;
             if (apiKey) {
@@ -73,7 +90,6 @@
             }
         }
 
-        // Function to parse Markdown and add "Copy" buttons to code blocks
         function formatMessage(message) {
             const container = document.createElement('div');
             container.innerHTML = marked.parse(message, {
@@ -94,7 +110,6 @@
             return container.innerHTML;
         }
 
-        // Function to copy text to clipboard
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
                 alert('Code copied to clipboard!');
@@ -103,7 +118,6 @@
             });
         }
 
-        // Function to fetch and send messages
         async function sendMessage() {
             const apiKey = localStorage.getItem('openai_api_key');
             if (!apiKey) {
@@ -146,7 +160,7 @@
 
                 // Format and display bot response
                 const formattedMessage = formatMessage(botMessage);
-                chatMessages.innerHTML += `<div class="message bot">ChatGPT: ${formattedMessage}</div>`;
+                chatMessages.innerHTML += `<div class="message bot">SearchResult: ${formattedMessage}</div>`;
             } catch (error) {
                 chatMessages.innerHTML += `<div class="message bot">Error: ${error.message}</div>`;
             }
