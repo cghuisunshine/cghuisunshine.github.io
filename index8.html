@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SearchResult Browser App</title>
-    <!-- If using strict CSP, consider adding 'unsafe-inline' or a nonce/hash to allow the inline CSS and JS below -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif; 
@@ -100,7 +100,6 @@
         <button id="sendMessageButton">Send</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const hamburgerMenu = document.getElementById('hamburgerMenu');
@@ -109,7 +108,6 @@
             const saveApiKeyButton = document.getElementById('saveApiKeyButton');
             const sendMessageButton = document.getElementById('sendMessageButton');
 
-            // Toggle the visibility of the API key and model selection on hamburger click
             hamburgerMenu.addEventListener('click', () => {
                 const isVisible = apiKeyWrapper.style.display === 'block';
                 apiKeyWrapper.style.display = isVisible ? 'none' : 'block';
@@ -142,7 +140,10 @@
                     const copyButton = document.createElement('button');
                     copyButton.textContent = 'Copy Code';
                     copyButton.className = 'copy-button';
-                    copyButton.addEventListener('click', () => copyToClipboard(codeBlock.textContent));
+                    copyButton.addEventListener('click', () => {
+                        console.log('Copy button clicked');
+                        copyToClipboard(codeBlock.textContent);
+                    });
                     codeBlock.parentElement.style.position = 'relative';
                     codeBlock.parentElement.appendChild(copyButton);
                 });
@@ -151,11 +152,33 @@
             }
 
             function copyToClipboard(text) {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('Code copied to clipboard!');
-                }).catch((err) => {
-                    alert('Failed to copy code: ' + err);
-                });
+                console.log('Attempting to copy text:', text);
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('Code copied to clipboard!');
+                    }).catch((err) => {
+                        console.error('Clipboard error:', err);
+                        alert('Failed to copy code. Try a secure context (HTTPS or localhost).');
+                    });
+                } else {
+                    // Fallback method if navigator.clipboard is unavailable
+                    fallbackCopyText(text);
+                }
+            }
+
+            function fallbackCopyText(text) {
+                // Create a temporary textarea to select and copy text
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    alert('Code copied to clipboard (fallback)!');
+                } catch (err) {
+                    alert('Failed to copy code using fallback method: ' + err);
+                }
+                document.body.removeChild(textarea);
             }
 
             async function sendMessage() {
@@ -209,4 +232,3 @@
     </script>
 </body>
 </html>
-
