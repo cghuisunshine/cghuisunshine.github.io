@@ -16,6 +16,15 @@
       margin: auto;
     }
 
+    .controls {
+      margin-top: 10px;
+    }
+
+    .controls button {
+      margin-right: 10px;
+      padding: 10px 20px;
+    }
+
     .message {
       margin: 10px 0;
     }
@@ -59,11 +68,6 @@
       height: 100px;
     }
 
-    button, select {
-      margin-top: 10px;
-      padding: 10px 20px;
-    }
-
     #apiKeyWrapper,
     #serviceSelectWrapper,
     #modelSelectWrapper {
@@ -104,7 +108,11 @@
   <div id="chat">
     <div id="chatMessages"></div>
     <textarea id="userMessage" placeholder="Type your message..."></textarea>
-    <button id="sendMessageButton">Send</button>
+    <div class="controls">
+      <button id="sendMessageButton">Send</button>
+      <button id="clearChatButton">Clear Chat</button>
+      <button id="copyLastButton">Copy Last Reply</button>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -119,6 +127,8 @@
       const serviceSelect = document.getElementById('serviceSelect');
       const modelSelect = document.getElementById('modelSelect');
       const sendBtn = document.getElementById('sendMessageButton');
+      const clearBtn = document.getElementById('clearChatButton');
+      const copyBtn = document.getElementById('copyLastButton');
       const chatMessages = document.getElementById('chatMessages');
       const apiKeyLabel = document.querySelector("label[for='apiKey']");
 
@@ -183,7 +193,7 @@
         updateApiKeyLabel();
       });
 
-      // Initial setup (default to Grok and its single model)
+      // Initial setup (default to Grok)
       refreshModels();
       updateApiKeyLabel();
 
@@ -209,7 +219,7 @@
           btn.className = 'copy-button';
           btn.addEventListener('click', () => {
             navigator.clipboard.writeText(codeBlock.textContent)
-              .then(() => alert('Copied!'))
+              .then(() => alert('Code copied!'))
               .catch(e => alert('Copy failed: ' + e));
           });
           codeBlock.parentElement.style.position = 'relative';
@@ -217,6 +227,24 @@
         });
         return container.innerHTML;
       }
+
+      // Clear chat history
+      clearBtn.addEventListener('click', () => {
+        chatMessages.innerHTML = '';
+      });
+
+      // Copy last bot reply
+      copyBtn.addEventListener('click', () => {
+        const bots = chatMessages.querySelectorAll('.message.bot');
+        if (!bots.length) {
+          return alert('No reply to copy.');
+        }
+        const lastBot = bots[bots.length - 1];
+        const text = lastBot.innerText.replace(/^[^:]+:\s*/, '');
+        navigator.clipboard.writeText(text)
+          .then(() => alert('Last reply copied!'))
+          .catch(e => alert('Copy failed: ' + e));
+      });
 
       // Send user message
       sendBtn.addEventListener('click', async () => {
