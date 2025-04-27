@@ -109,6 +109,29 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
+
+    /* “alert-like” popup */
+    .auto-alert {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);      /* true center */
+      padding: 18px 32px;
+      background: #fff;
+      color: #000;
+      font: 16px/1.4 system-ui, sans-serif;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.25);
+      z-index: 10000;
+
+      /* fade-in / fade-out */
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+    .auto-alert.show  { opacity: 1; }  /* after insertion */
+    .auto-alert.hide  { opacity: 0; }  /* before removal */
+
   </style>
 </head>
 <body>
@@ -255,13 +278,38 @@
         chatMessages.scrollTop = 0;
       });
 
-      // Copy last bot reply
-      copyBtn.addEventListener('click', () => {
-        const bots = chatMessages.querySelectorAll('.message.bot');
-        if (!bots.length) return alert('No reply to copy.');
-        const text = bots[bots.length - 1].innerText.replace(/^[^:]+:\s*/, '');
-        navigator.clipboard.writeText(text).then(() => alert('Last reply copied!'));
-      });
+      /**
+     * Shows a centred, self-dismissing dialog.
+     * @param {string}  msg       Text to display
+     * @param {number} [ms=3000]  Time before it fades away
+     */
+    function autoAlert(msg, ms = 3000) {
+      const box = document.createElement('div');
+      box.className = 'auto-alert';
+      box.textContent = msg;
+      document.body.appendChild(box);
+
+      /* kick off fade-in on next frame */
+      requestAnimationFrame(() => box.classList.add('show'));
+
+      /* schedule fade-out then removal */
+      setTimeout(() => {
+        box.classList.replace('show', 'hide');
+        box.addEventListener('transitionend', () => box.remove(), { once: true });
+      }, ms);
+    }
+
+    /* ——— your existing code ——— */
+    copyBtn.addEventListener('click', () => {
+      const bots = chatMessages.querySelectorAll('.message.bot');
+      if (!bots.length) return autoAlert('No reply to copy.');
+      const text = bots[bots.length - 1].innerText.replace(/^[^:]+:\s*/, '');
+      navigator.clipboard.writeText(text)
+        .then(() => autoAlert('Last reply copied!'))
+        .catch(()  => autoAlert('Copy failed.'));
+    });
+
+
 
       // Ctrl/Cmd+Enter to send
       userArea.addEventListener('keydown', e => {
