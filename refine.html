@@ -18,11 +18,17 @@
     }
 
     /* center and constrain chat area */
-    #chat {
+    #chat-container {
       width: 100%;
       max-width: 600px;
       margin: auto;
       padding: 0 10px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
     }
 
     .controls {
@@ -115,35 +121,39 @@
   </style>
 </head>
 <body>
-  <div id="hamburgerMenu" role="button" tabindex="0" aria-label="Toggle menu">☰</div>
+  <div id="chat-container">
+    <h1>Refine or translate to native English</h1>
 
-  <div id="apiKeyWrapper">
-    <label for="apiKey">API Key:</label>
-    <input type="password" id="apiKey" placeholder="Enter your API key"/>
-    <button id="saveApiKeyButton">Save Key</button>
-  </div>
+    <div id="hamburgerMenu" role="button" tabindex="0" aria-label="Toggle menu">☰</div>
 
-  <div id="serviceSelectWrapper">
-    <label for="serviceSelect">Service:</label>
-    <select id="serviceSelect">
-      <option value="openai">OpenAI</option>
-      <option value="deepseek">DeepSeek</option>
-      <option value="grok" selected>Grok</option>
-    </select>
-  </div>
+    <div id="apiKeyWrapper">
+      <label for="apiKey">API Key:</label>
+      <input type="password" id="apiKey" placeholder="Enter your API key"/>
+      <button id="saveApiKeyButton">Save Key</button>
+    </div>
 
-  <div id="modelSelectWrapper">
-    <label for="modelSelect">Model:</label>
-    <select id="modelSelect"></select>
-  </div>
+    <div id="serviceSelectWrapper">
+      <label for="serviceSelect">Service:</label>
+      <select id="serviceSelect">
+        <option value="openai">OpenAI</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="grok" selected>Grok</option>
+      </select>
+    </div>
 
-  <div id="chat">
-    <div id="chatMessages"></div>
-    <textarea id="userMessage" placeholder="Type your message..."></textarea>
-    <div class="controls">
-      <button id="sendMessageButton">Send</button>
-      <button id="clearChatButton">Clear</button>
-      <button id="copyLastButton">Copy Reply</button>
+    <div id="modelSelectWrapper">
+      <label for="modelSelect">Model:</label>
+      <select id="modelSelect"></select>
+    </div>
+
+    <div id="chat">
+      <div id="chatMessages"></div>
+      <textarea id="userMessage" placeholder="Type your message..."></textarea>
+      <div class="controls">
+        <button id="sendMessageButton">Send</button>
+        <button id="clearChatButton">Clear</button>
+        <button id="copyLastButton">Copy Reply</button>
+      </div>
     </div>
   </div>
 
