@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multi-Service Chat App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #chat {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .message {
+      margin: 10px 0;
+    }
+
+    .user {
+      color: blue;
+    }
+
+    .bot {
+      color: green;
+    }
+
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 5px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: monospace;
+      color: #d6336c;
+    }
+
+    .copy-button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 5px;
+      border-radius: 3px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+    }
+
+    button, select {
+      margin-top: 10px;
+      padding: 10px 20px;
+    }
+
+    #apiKeyWrapper,
+    #serviceSelectWrapper,
+    #modelSelectWrapper {
+      display: none; /* hidden until menu toggled */
+      margin-bottom: 20px;
+    }
+
+    #hamburgerMenu {
+      font-size: 24px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="hamburgerMenu" aria-label="Toggle menu" role="button" tabindex="0">☰</div>
+
+  <div id="apiKeyWrapper">
+    <label for="apiKey">API Key:</label>
+    <input type="password" id="apiKey" placeholder="Enter your API key"/>
+    <button id="saveApiKeyButton">Save Key</button>
+  </div>
+
+  <div id="serviceSelectWrapper">
+    <label for="serviceSelect">Service:</label>
+    <select id="serviceSelect">
+      <option value="openai">OpenAI</option>
+      <option value="deepseek">DeepSeek</option>
+      <option value="grok" selected>Grok</option>
+    </select>
+  </div>
+
+  <div id="modelSelectWrapper">
+    <label for="modelSelect">Model:</label>
+    <select id="modelSelect"></select>
+  </div>
+
+  <div id="chat">
+    <div id="chatMessages"></div>
+    <textarea id="userMessage" placeholder="Type your message..."></textarea>
+    <button id="sendMessageButton">Send</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // UI elements
+      const hamburger = document.getElementById('hamburgerMenu');
+      const apiKeyWrapper = document.getElementById('apiKeyWrapper');
+      const serviceWrapper = document.getElementById('serviceSelectWrapper');
+      const modelWrapper = document.getElementById('modelSelectWrapper');
+      const saveKeyBtn = document.getElementById('saveApiKeyButton');
+      const serviceSelect = document.getElementById('serviceSelect');
+      const modelSelect = document.getElementById('modelSelect');
+      const sendBtn = document.getElementById('sendMessageButton');
+      const chatMessages = document.getElementById('chatMessages');
+      const apiKeyLabel = document.querySelector("label[for='apiKey']");
+
+      // Map service keys to display names and endpoints
+      const serviceDisplay = {
+        openai: 'OpenAI',
+        deepseek: 'DeepSeek',
+        grok: 'Grok'
+      };
+      const serviceEndpoint = {
+        openai: 'https://api.openai.com/v1/chat/completions',
+        deepseek: 'https://api.deepseek.com/v1/chat/completions',
+        grok: 'https://api.x.ai/v1/chat/completions'
+      };
+
+      // Available models per service
+      const modelOptions = {
+        openai: [
+          { value: 'gpt-4o-mini', label: 'gpt-4o-mini' }
+        ],
+        deepseek: [
+          { value: 'deepseek-chat',    label: 'DeepSeek Chat (default)' },
+          { value: 'deepseek-reasoner', label: 'DeepSeek Reasoner' }
+        ],
+        grok: [
+          { value: 'grok-3', label: 'grok-3 (default)' }
+        ]
+      };
+
+      // System prompt for all services
+      const systemPrompt = `Task: Review the input text. If it is not in English, translate it into clear, idiomatic, native-level English, preserving the original meaning, tone, and any important formatting. If it is already in English, refine it so it reads as if written by an educated native speaker—correct grammar, improve word choice, and enhance flow and clarity—while keeping the author’s intended meaning and style intact. Output only the improved English text, with no added explanations or notes.`;
+
+      // Toggle menu
+      hamburger.addEventListener('click', () => {
+        const show = apiKeyWrapper.style.display !== 'block';
+        apiKeyWrapper.style.display   = show ? 'block' : 'none';
+        serviceWrapper.style.display  = show ? 'block' : 'none';
+        modelWrapper.style.display    = show ? 'block' : 'none';
+      });
+
+      // Populate models dropdown
+      function refreshModels() {
+        const svc = serviceSelect.value;
+        modelSelect.innerHTML = '';
+        modelOptions[svc].forEach(opt => {
+          const el = document.createElement('option');
+          el.value       = opt.value;
+          el.textContent = opt.label;
+          modelSelect.appendChild(el);
+        });
+      }
+
+      // Update API key label based on service
+      function updateApiKeyLabel() {
+        const svc = serviceSelect.value;
+        apiKeyLabel.textContent = `${serviceDisplay[svc]} API Key:`;
+      }
+
+      // On service change
+      serviceSelect.addEventListener('change', () => {
+        refreshModels();
+        updateApiKeyLabel();
+      });
+
+      // Initial setup (default to Grok and its single model)
+      refreshModels();
+      updateApiKeyLabel();
+
+      // Save API key for selected service
+      saveKeyBtn.addEventListener('click', () => {
+        const key = document.getElementById('apiKey').value.trim();
+        const svc = serviceSelect.value;
+        if (!key) {
+          return alert('Please enter a valid key.');
+        }
+        localStorage.setItem(`${svc}_api_key`, key);
+        alert(`${serviceDisplay[svc]} API key saved!`);
+        document.getElementById('apiKey').value = '';
+      });
+
+      // Format bot messages (with copy-code buttons)
+      function formatMessage(msg) {
+        const container = document.createElement('div');
+        container.innerHTML = marked.parse(msg, { gfm: true, breaks: true });
+        container.querySelectorAll('pre code').forEach(codeBlock => {
+          const btn = document.createElement('button');
+          btn.textContent = 'Copy Code';
+          btn.className = 'copy-button';
+          btn.addEventListener('click', () => {
+            navigator.clipboard.writeText(codeBlock.textContent)
+              .then(() => alert('Copied!'))
+              .catch(e => alert('Copy failed: ' + e));
+          });
+          codeBlock.parentElement.style.position = 'relative';
+          codeBlock.parentElement.appendChild(btn);
+        });
+        return container.innerHTML;
+      }
+
+      // Send user message
+      sendBtn.addEventListener('click', async () => {
+        const svc = serviceSelect.value;
+        const key = localStorage.getItem(`${svc}_api_key`);
+        if (!key) return alert(`Please set your ${serviceDisplay[svc]} API key first.`);
+        const text = document.getElementById('userMessage').value.trim();
+        if (!text) return alert('Please type a message.');
+
+        // show user message
+        chatMessages.innerHTML += `<div class="message user">You: ${text}</div>`;
+        document.getElementById('userMessage').value = '';
+
+        try {
+          const res = await fetch(serviceEndpoint[svc], {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${key}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: modelSelect.value,
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user',   content: text }
+              ]
+            })
+          });
+          if (!res.ok) throw new Error(res.statusText);
+          const data = await res.json();
+          const reply = data.choices[0].message.content;
+
+          chatMessages.innerHTML +=
+            `<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`;
+        } catch (err) {
+          chatMessages.innerHTML +=
+            `<div class="message bot">Error: ${err.message}</div>`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
