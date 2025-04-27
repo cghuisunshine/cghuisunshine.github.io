@@ -5,37 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Multi-Service Chat App</title>
   <style>
+    /* make sizing predictable */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
+      line-height: 1.4;
     }
 
+    /* center and constrain chat area */
     #chat {
+      width: 100%;
       max-width: 600px;
       margin: auto;
+      padding: 0 10px;
     }
 
     .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       margin-top: 10px;
     }
-
     .controls button {
-      margin-right: 10px;
-      padding: 10px 20px;
+      flex: 1 1 100px;
+      padding: 10px;
+      font-size: 1rem;
+      cursor: pointer;
     }
 
     .message {
       margin: 10px 0;
+      word-wrap: break-word;
     }
-
-    .user {
-      color: blue;
-    }
-
-    .bot {
-      color: green;
-    }
+    .user { color: #0066cc; }
+    .bot  { color: #228822; }
 
     pre {
       background: #f4f4f4;
@@ -59,31 +67,55 @@
       border: none;
       padding: 5px;
       border-radius: 3px;
-      font-size: 12px;
+      font-size: 0.8rem;
       cursor: pointer;
     }
 
-    textarea {
+    textarea,
+    input, select {
       width: 100%;
+      margin-top: 5px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    textarea {
       height: 100px;
+      resize: vertical;
+    }
+
+    button {
+      border: none;
+      border-radius: 4px;
     }
 
     #apiKeyWrapper,
     #serviceSelectWrapper,
     #modelSelectWrapper {
-      display: none; /* hidden until menu toggled */
-      margin-bottom: 20px;
+      display: none; /* toggled by menu */
+      margin-bottom: 15px;
     }
 
     #hamburgerMenu {
-      font-size: 24px;
+      font-size: 1.5rem;
       cursor: pointer;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 400px) {
+      .controls {
+        flex-direction: column;
+      }
+      .controls button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="hamburgerMenu" aria-label="Toggle menu" role="button" tabindex="0">☰</div>
+  <div id="hamburgerMenu" role="button" tabindex="0" aria-label="Toggle menu">☰</div>
 
   <div id="apiKeyWrapper">
     <label for="apiKey">API Key:</label>
@@ -110,152 +142,117 @@
     <textarea id="userMessage" placeholder="Type your message..."></textarea>
     <div class="controls">
       <button id="sendMessageButton">Send</button>
-      <button id="clearChatButton">Clear Chat</button>
-      <button id="copyLastButton">Copy Last Reply</button>
+      <button id="clearChatButton">Clear</button>
+      <button id="copyLastButton">Copy Reply</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // UI elements
-      const hamburger = document.getElementById('hamburgerMenu');
-      const apiKeyWrapper = document.getElementById('apiKeyWrapper');
-      const serviceWrapper = document.getElementById('serviceSelectWrapper');
-      const modelWrapper = document.getElementById('modelSelectWrapper');
-      const saveKeyBtn = document.getElementById('saveApiKeyButton');
-      const serviceSelect = document.getElementById('serviceSelect');
-      const modelSelect = document.getElementById('modelSelect');
-      const sendBtn = document.getElementById('sendMessageButton');
-      const clearBtn = document.getElementById('clearChatButton');
-      const copyBtn = document.getElementById('copyLastButton');
-      const chatMessages = document.getElementById('chatMessages');
-      const apiKeyLabel = document.querySelector("label[for='apiKey']");
+      const hamburger        = document.getElementById('hamburgerMenu');
+      const apiKeyWrapper    = document.getElementById('apiKeyWrapper');
+      const serviceWrapper   = document.getElementById('serviceSelectWrapper');
+      const modelWrapper     = document.getElementById('modelSelectWrapper');
+      const saveKeyBtn       = document.getElementById('saveApiKeyButton');
+      const serviceSelect    = document.getElementById('serviceSelect');
+      const modelSelect      = document.getElementById('modelSelect');
+      const sendBtn          = document.getElementById('sendMessageButton');
+      const clearBtn         = document.getElementById('clearChatButton');
+      const copyBtn          = document.getElementById('copyLastButton');
+      const chatMessages     = document.getElementById('chatMessages');
+      const apiKeyLabel      = document.querySelector("label[for='apiKey']");
 
-      // Map service keys to display names and endpoints
       const serviceDisplay = {
-        openai: 'OpenAI',
+        openai:   'OpenAI',
         deepseek: 'DeepSeek',
-        grok: 'Grok'
+        grok:     'Grok'
       };
       const serviceEndpoint = {
-        openai: 'https://api.openai.com/v1/chat/completions',
+        openai:   'https://api.openai.com/v1/chat/completions',
         deepseek: 'https://api.deepseek.com/v1/chat/completions',
-        grok: 'https://api.x.ai/v1/chat/completions'
+        grok:     'https://api.x.ai/v1/chat/completions'
       };
-
-      // Available models per service
       const modelOptions = {
-        openai: [
-          { value: 'gpt-4o-mini', label: 'gpt-4o-mini' }
-        ],
-        deepseek: [
-          { value: 'deepseek-chat',    label: 'DeepSeek Chat (default)' },
-          { value: 'deepseek-reasoner', label: 'DeepSeek Reasoner' }
-        ],
-        grok: [
-          { value: 'grok-3', label: 'grok-3 (default)' }
-        ]
+        openai:   [ {value:'gpt-4o-mini', label:'gpt-4o-mini'} ],
+        deepseek: [ {value:'deepseek-chat',label:'DeepSeek Chat'},{value:'deepseek-reasoner',label:'DeepSeek Reasoner'} ],
+        grok:     [ {value:'grok-3',       label:'grok-3'} ]
       };
-
-      // System prompt for all services
       const systemPrompt = `Task: Review the input text. If it is not in English, translate it into clear, idiomatic, native-level English, preserving the original meaning, tone, and any important formatting. If it is already in English, refine it so it reads as if written by an educated native speaker—correct grammar, improve word choice, and enhance flow and clarity—while keeping the author’s intended meaning and style intact. Output only the improved English text, with no added explanations or notes.`;
 
-      // Toggle menu
+      // toggle menu
       hamburger.addEventListener('click', () => {
         const show = apiKeyWrapper.style.display !== 'block';
-        apiKeyWrapper.style.display   = show ? 'block' : 'none';
-        serviceWrapper.style.display  = show ? 'block' : 'none';
-        modelWrapper.style.display    = show ? 'block' : 'none';
+        apiKeyWrapper.style.display    = show ? 'block' : 'none';
+        serviceWrapper.style.display   = show ? 'block' : 'none';
+        modelWrapper.style.display     = show ? 'block' : 'none';
       });
 
-      // Populate models dropdown
+      // populate models
       function refreshModels() {
         const svc = serviceSelect.value;
         modelSelect.innerHTML = '';
         modelOptions[svc].forEach(opt => {
-          const el = document.createElement('option');
-          el.value       = opt.value;
-          el.textContent = opt.label;
-          modelSelect.appendChild(el);
+          const o = document.createElement('option');
+          o.value = opt.value;
+          o.textContent = opt.label;
+          modelSelect.append(o);
         });
       }
-
-      // Update API key label based on service
-      function updateApiKeyLabel() {
-        const svc = serviceSelect.value;
-        apiKeyLabel.textContent = `${serviceDisplay[svc]} API Key:`;
-      }
-
-      // On service change
       serviceSelect.addEventListener('change', () => {
         refreshModels();
-        updateApiKeyLabel();
+        apiKeyLabel.textContent = serviceDisplay[serviceSelect.value] + ' API Key:';
       });
 
-      // Initial setup (default to Grok)
+      // initial setup
       refreshModels();
-      updateApiKeyLabel();
+      apiKeyLabel.textContent = serviceDisplay[serviceSelect.value] + ' API Key:';
 
-      // Save API key for selected service
+      // save key
       saveKeyBtn.addEventListener('click', () => {
         const key = document.getElementById('apiKey').value.trim();
         const svc = serviceSelect.value;
-        if (!key) {
-          return alert('Please enter a valid key.');
-        }
+        if (!key) return alert('Please enter a valid key.');
         localStorage.setItem(`${svc}_api_key`, key);
-        alert(`${serviceDisplay[svc]} API key saved!`);
+        alert(`${serviceDisplay[svc]} key saved!`);
         document.getElementById('apiKey').value = '';
       });
 
-      // Format bot messages (with copy-code buttons)
+      // format bot messages
       function formatMessage(msg) {
-        const container = document.createElement('div');
-        container.innerHTML = marked.parse(msg, { gfm: true, breaks: true });
-        container.querySelectorAll('pre code').forEach(codeBlock => {
+        const div = document.createElement('div');
+        div.innerHTML = marked.parse(msg, { gfm:true, breaks:true });
+        div.querySelectorAll('pre code').forEach(cb => {
           const btn = document.createElement('button');
-          btn.textContent = 'Copy Code';
           btn.className = 'copy-button';
-          btn.addEventListener('click', () => {
-            navigator.clipboard.writeText(codeBlock.textContent)
-              .then(() => alert('Code copied!'))
-              .catch(e => alert('Copy failed: ' + e));
-          });
-          codeBlock.parentElement.style.position = 'relative';
-          codeBlock.parentElement.appendChild(btn);
+          btn.textContent = 'Copy Code';
+          btn.onclick = () => navigator.clipboard.writeText(cb.textContent).then(()=>alert('Copied!'));
+          cb.parentElement.style.position = 'relative';
+          cb.parentElement.appendChild(btn);
         });
-        return container.innerHTML;
+        return div.innerHTML;
       }
 
-      // Clear chat history
-      clearBtn.addEventListener('click', () => {
-        chatMessages.innerHTML = '';
-      });
+      // clear chat
+      clearBtn.onclick = () => chatMessages.innerHTML = '';
 
-      // Copy last bot reply
-      copyBtn.addEventListener('click', () => {
+      // copy last reply
+      copyBtn.onclick = () => {
         const bots = chatMessages.querySelectorAll('.message.bot');
-        if (!bots.length) {
-          return alert('No reply to copy.');
-        }
-        const lastBot = bots[bots.length - 1];
-        const text = lastBot.innerText.replace(/^[^:]+:\s*/, '');
-        navigator.clipboard.writeText(text)
-          .then(() => alert('Last reply copied!'))
-          .catch(e => alert('Copy failed: ' + e));
-      });
+        if (!bots.length) return alert('No reply to copy.');
+        const text = bots[bots.length-1].innerText.replace(/^[^:]+:\s*/,'');
+        navigator.clipboard.writeText(text).then(()=>alert('Last reply copied!'));
+      };
 
-      // Send user message
-      sendBtn.addEventListener('click', async () => {
+      // send
+      sendBtn.onclick = async () => {
         const svc = serviceSelect.value;
         const key = localStorage.getItem(`${svc}_api_key`);
-        if (!key) return alert(`Please set your ${serviceDisplay[svc]} API key first.`);
-        const text = document.getElementById('userMessage').value.trim();
-        if (!text) return alert('Please type a message.');
+        if (!key) return alert(`Set your ${serviceDisplay[svc]} key first.`);
+        const userText = document.getElementById('userMessage').value.trim();
+        if (!userText) return alert('Please type a message.');
 
-        // show user message
-        chatMessages.innerHTML += `<div class="message user">You: ${text}</div>`;
+        chatMessages.innerHTML += `<div class="message user">You: ${userText}</div>`;
         document.getElementById('userMessage').value = '';
 
         try {
@@ -268,22 +265,20 @@
             body: JSON.stringify({
               model: modelSelect.value,
               messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user',   content: text }
+                { role:'system', content:systemPrompt },
+                { role:'user',   content:userText }
               ]
             })
           });
           if (!res.ok) throw new Error(res.statusText);
           const data = await res.json();
           const reply = data.choices[0].message.content;
-
           chatMessages.innerHTML +=
             `<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`;
-        } catch (err) {
-          chatMessages.innerHTML +=
-            `<div class="message bot">Error: ${err.message}</div>`;
+        } catch (e) {
+          chatMessages.innerHTML += `<div class="message bot">Error: ${e.message}</div>`;
         }
-      });
+      };
     });
   </script>
 </body>
