@@ -6,9 +6,7 @@
   <title>Refine or translate to native English</title>
   <style>
     /* make sizing predictable */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { box-sizing: border-box; }
 
     body {
       font-family: Arial, sans-serif;
@@ -111,18 +109,13 @@
     }
 
     @media (max-width: 400px) {
-      .controls {
-        flex-direction: column;
-      }
-      .controls button {
-        width: 100%;
-      }
+      .controls { flex-direction: column; }
+      .controls button { width: 100%; }
     }
   </style>
 </head>
 <body>
   <div id="chat-container">
-    <h1>Refine or translate to native English</h1>
 
     <div id="hamburgerMenu" role="button" tabindex="0" aria-label="Toggle menu">☰</div>
 
@@ -148,7 +141,7 @@
 
     <div id="chat">
       <div id="chatMessages"></div>
-      <textarea id="userMessage" placeholder="Type your message..."></textarea>
+      <textarea id="userMessage" placeholder="Type your message...it would be refined or translated"></textarea>
       <div class="controls">
         <button id="sendMessageButton">Send</button>
         <button id="clearChatButton">Clear</button>
@@ -160,18 +153,18 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const hamburger        = document.getElementById('hamburgerMenu');
-      const apiKeyWrapper    = document.getElementById('apiKeyWrapper');
-      const serviceWrapper   = document.getElementById('serviceSelectWrapper');
-      const modelWrapper     = document.getElementById('modelSelectWrapper');
-      const saveKeyBtn       = document.getElementById('saveApiKeyButton');
-      const serviceSelect    = document.getElementById('serviceSelect');
-      const modelSelect      = document.getElementById('modelSelect');
-      const sendBtn          = document.getElementById('sendMessageButton');
-      const clearBtn         = document.getElementById('clearChatButton');
-      const copyBtn          = document.getElementById('copyLastButton');
-      const chatMessages     = document.getElementById('chatMessages');
-      const apiKeyLabel      = document.querySelector("label[for='apiKey']");
+      const hamburger      = document.getElementById('hamburgerMenu');
+      const apiKeyWrapper  = document.getElementById('apiKeyWrapper');
+      const serviceWrapper = document.getElementById('serviceSelectWrapper');
+      const modelWrapper   = document.getElementById('modelSelectWrapper');
+      const saveKeyBtn     = document.getElementById('saveApiKeyButton');
+      const serviceSelect  = document.getElementById('serviceSelect');
+      const modelSelect    = document.getElementById('modelSelect');
+      const sendBtn        = document.getElementById('sendMessageButton');
+      const clearBtn       = document.getElementById('clearChatButton');
+      const copyBtn        = document.getElementById('copyLastButton');
+      const chatMessages   = document.getElementById('chatMessages');
+      const apiKeyLabel    = document.querySelector("label[for='apiKey']");
 
       const serviceDisplay = {
         openai:   'OpenAI',
@@ -188,7 +181,12 @@
         deepseek: [ {value:'deepseek-chat',label:'DeepSeek Chat'},{value:'deepseek-reasoner',label:'DeepSeek Reasoner'} ],
         grok:     [ {value:'grok-3',       label:'grok-3'} ]
       };
+
+      // system prompt & conversation history
       const systemPrompt = `Task: Review the input text. If it is not in English, translate it into clear, idiomatic, native-level English, preserving the original meaning, tone, and any important formatting. If it is already in English, refine it so it reads as if written by an educated native speaker—correct grammar, improve word choice, and enhance flow and clarity—while keeping the author’s intended meaning and style intact. Output only the improved English text, with no added explanations or notes.`;
+      const MAX_PAIRS = 10;
+      const MAX_MESSAGES = 1 + MAX_PAIRS * 2;
+      const conversation = [{ role: 'system', content: systemPrompt }];
 
       // toggle menu
       hamburger.addEventListener('click', () => {
@@ -236,7 +234,7 @@
           const btn = document.createElement('button');
           btn.className = 'copy-button';
           btn.textContent = 'Copy Code';
-          btn.onclick = () => navigator.clipboard.writeText(cb.textContent).then(()=>alert('Copied!'));
+          btn.onclick = () => navigator.clipboard.writeText(cb.textContent).then(() => alert('Copied!'));
           cb.parentElement.style.position = 'relative';
           cb.parentElement.appendChild(btn);
         });
@@ -244,14 +242,18 @@
       }
 
       // clear chat
-      clearBtn.onclick = () => chatMessages.innerHTML = '';
+      clearBtn.onclick = () => {
+        chatMessages.innerHTML = '';
+        // reset context but keep system prompt
+        conversation.splice(1);
+      };
 
       // copy last reply
       copyBtn.onclick = () => {
         const bots = chatMessages.querySelectorAll('.message.bot');
         if (!bots.length) return alert('No reply to copy.');
-        const text = bots[bots.length-1].innerText.replace(/^[^:]+:\s*/,'');
-        navigator.clipboard.writeText(text).then(()=>alert('Last reply copied!'));
+        const text = bots[bots.length - 1].innerText.replace(/^[^:]+:\s*/,'');
+        navigator.clipboard.writeText(text).then(() => alert('Last reply copied!'));
       };
 
       // send
@@ -262,6 +264,8 @@
         const userText = document.getElementById('userMessage').value.trim();
         if (!userText) return alert('Please type a message.');
 
+        // add to context & UI
+        conversation.push({ role: 'user', content: userText });
         chatMessages.innerHTML += `<div class="message user">You: ${userText}</div>`;
         document.getElementById('userMessage').value = '';
 
@@ -274,15 +278,20 @@
             },
             body: JSON.stringify({
               model: modelSelect.value,
-              messages: [
-                { role:'system', content:systemPrompt },
-                { role:'user',   content:userText }
-              ]
+              messages: conversation
             })
           });
           if (!res.ok) throw new Error(res.statusText);
           const data = await res.json();
           const reply = data.choices[0].message.content;
+
+          // add assistant reply to context & UI
+          conversation.push({ role: 'assistant', content: reply });
+          // trim if exceeds max messages
+          if (conversation.length > MAX_MESSAGES) {
+            conversation.splice(1, conversation.length - MAX_MESSAGES);
+          }
+
           chatMessages.innerHTML +=
             `<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`;
         } catch (e) {
