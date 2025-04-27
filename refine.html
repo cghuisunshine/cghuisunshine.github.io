@@ -141,7 +141,7 @@
 
     <div id="chat">
       <div id="chatMessages"></div>
-      <textarea id="userMessage" placeholder="Type your message...it would be refined or translated"></textarea>
+      <textarea id="userMessage" placeholder="Type your message...it would be refined or translated to natvie English"></textarea>
       <div class="controls">
         <button id="sendMessageButton">Send</button>
         <button id="clearChatButton">Clear</button>
@@ -164,6 +164,7 @@
       const clearBtn       = document.getElementById('clearChatButton');
       const copyBtn        = document.getElementById('copyLastButton');
       const chatMessages   = document.getElementById('chatMessages');
+      const userArea       = document.getElementById('userMessage');
       const apiKeyLabel    = document.querySelector("label[for='apiKey']");
 
       const serviceDisplay = {
@@ -244,7 +245,6 @@
       // clear chat
       clearBtn.onclick = () => {
         chatMessages.innerHTML = '';
-        // reset context but keep system prompt
         conversation.splice(1);
       };
 
@@ -256,18 +256,26 @@
         navigator.clipboard.writeText(text).then(() => alert('Last reply copied!'));
       };
 
+      // handle Cmd+Enter / Ctrl+Enter
+      userArea.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          sendBtn.click();
+        }
+      });
+
       // send
       sendBtn.onclick = async () => {
         const svc = serviceSelect.value;
         const key = localStorage.getItem(`${svc}_api_key`);
         if (!key) return alert(`Set your ${serviceDisplay[svc]} key first.`);
-        const userText = document.getElementById('userMessage').value.trim();
+        const userText = userArea.value.trim();
         if (!userText) return alert('Please type a message.');
 
         // add to context & UI
         conversation.push({ role: 'user', content: userText });
         chatMessages.innerHTML += `<div class="message user">You: ${userText}</div>`;
-        document.getElementById('userMessage').value = '';
+        userArea.value = '';
 
         try {
           const res = await fetch(serviceEndpoint[svc], {
@@ -287,7 +295,6 @@
 
           // add assistant reply to context & UI
           conversation.push({ role: 'assistant', content: reply });
-          // trim if exceeds max messages
           if (conversation.length > MAX_MESSAGES) {
             conversation.splice(1, conversation.length - MAX_MESSAGES);
           }
