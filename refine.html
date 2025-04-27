@@ -5,35 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Refine or translate to native English</title>
   <style>
-    /* make sizing predictable */
+    /* predictable box-sizing */
     *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
       line-height: 1.4;
     }
 
-    /* center and constrain chat area */
+    /* center & constrain overall chat area */
     #chat-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 0;    /* top/bottom padding */
+      position: relative; /* for absolute children if needed */
+    }
+
+    #hamburgerMenu {
+      font-size: 1.5rem;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    #apiKeyWrapper,
+    #serviceSelectWrapper,
+    #modelSelectWrapper {
+      display: none;      /* toggled by menu */
+      margin-bottom: 15px;
+    }
+
+    /* scrollable messages pane */
+    #chatMessages {
+      /* Adjust 180px if your input area changes size */
+      height: calc(100vh - 180px);
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      word-wrap: break-word;
+    }
+
+    /* fixed input area */
+    #inputWrapper {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
       width: 100%;
       max-width: 600px;
-      margin: auto;
-      padding: 0 10px;
+      background: #fff;
+      padding: 10px 20px;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 1.8rem;
+    /* textarea & controls styling */
+    #userMessage {
+      width: 100%;
+      height: 100px;
+      resize: none;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 8px;
     }
-
     .controls {
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
-      margin-top: 10px;
     }
     .controls button {
       flex: 1 1 100px;
@@ -42,13 +85,7 @@
       cursor: pointer;
     }
 
-    .message {
-      margin: 10px 0;
-      word-wrap: break-word;
-    }
-    .user { color: #0066cc; }
-    .bot  { color: #228822; }
-
+    /* code block styling */
     pre {
       background: #f4f4f4;
       padding: 10px;
@@ -56,12 +93,10 @@
       position: relative;
       overflow-x: auto;
     }
-
     code {
       font-family: monospace;
       color: #d6336c;
     }
-
     .copy-button {
       position: absolute;
       top: 5px;
@@ -74,49 +109,10 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
-
-    textarea,
-    input, select {
-      width: 100%;
-      margin-top: 5px;
-      padding: 10px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    textarea {
-      height: 100px;
-      resize: vertical;
-    }
-
-    button {
-      border: none;
-      border-radius: 4px;
-    }
-
-    #apiKeyWrapper,
-    #serviceSelectWrapper,
-    #modelSelectWrapper {
-      display: none; /* toggled by menu */
-      margin-bottom: 15px;
-    }
-
-    #hamburgerMenu {
-      font-size: 1.5rem;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-
-    @media (max-width: 400px) {
-      .controls { flex-direction: column; }
-      .controls button { width: 100%; }
-    }
   </style>
 </head>
 <body>
   <div id="chat-container">
-
     <div id="hamburgerMenu" role="button" tabindex="0" aria-label="Toggle menu">☰</div>
 
     <div id="apiKeyWrapper">
@@ -139,21 +135,24 @@
       <select id="modelSelect"></select>
     </div>
 
-    <div id="chat">
-      <textarea id="userMessage" placeholder="Type your message...it would be refined or translated to natvie English"></textarea>
-      <div class="controls">
-        <button id="sendMessageButton">Send</button>
-        <button id="clearChatButton">Clear</button>
-        <button id="copyLastButton">Copy Reply</button>
-      </div>
-      <div id="chatMessages"></div>
+    <!-- scrollable messages -->
+    <div id="chatMessages"></div>
+  </div>
 
+  <!-- fixed input + buttons -->
+  <div id="inputWrapper">
+    <textarea id="userMessage" placeholder="Type your message... it will be refined or translated to native English"></textarea>
+    <div class="controls">
+      <button id="sendMessageButton">Send</button>
+      <button id="clearChatButton">Clear</button>
+      <button id="copyLastButton">Copy Reply</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Element refs
       const hamburger      = document.getElementById('hamburgerMenu');
       const apiKeyWrapper  = document.getElementById('apiKeyWrapper');
       const serviceWrapper = document.getElementById('serviceSelectWrapper');
@@ -161,13 +160,14 @@
       const saveKeyBtn     = document.getElementById('saveApiKeyButton');
       const serviceSelect  = document.getElementById('serviceSelect');
       const modelSelect    = document.getElementById('modelSelect');
+      const chatMessages   = document.getElementById('chatMessages');
+      const userArea       = document.getElementById('userMessage');
       const sendBtn        = document.getElementById('sendMessageButton');
       const clearBtn       = document.getElementById('clearChatButton');
       const copyBtn        = document.getElementById('copyLastButton');
-      const chatMessages   = document.getElementById('chatMessages');
-      const userArea       = document.getElementById('userMessage');
       const apiKeyLabel    = document.querySelector("label[for='apiKey']");
 
+      // Service & model config
       const serviceDisplay = {
         openai:   'OpenAI',
         deepseek: 'DeepSeek',
@@ -184,21 +184,21 @@
         grok:     [ {value:'grok-3',       label:'grok-3'} ]
       };
 
-      // system prompt & conversation history
+      // Conversation state
       const systemPrompt = `Task: Review the input text. If it is not in English, translate it into clear, idiomatic, native-level English, preserving the original meaning, tone, and any important formatting. If it is already in English, refine it so it reads as if written by an educated native speaker—correct grammar, improve word choice, and enhance flow and clarity—while keeping the author’s intended meaning and style intact. Output only the improved English text, with no added explanations or notes.`;
       const MAX_PAIRS = 10;
       const MAX_MESSAGES = 1 + MAX_PAIRS * 2;
       const conversation = [{ role: 'system', content: systemPrompt }];
 
-      // toggle menu
+      // Toggle hidden menu
       hamburger.addEventListener('click', () => {
         const show = apiKeyWrapper.style.display !== 'block';
-        apiKeyWrapper.style.display    = show ? 'block' : 'none';
-        serviceWrapper.style.display   = show ? 'block' : 'none';
-        modelWrapper.style.display     = show ? 'block' : 'none';
+        apiKeyWrapper.style.display  = show ? 'block' : 'none';
+        serviceWrapper.style.display = show ? 'block' : 'none';
+        modelWrapper.style.display   = show ? 'block' : 'none';
       });
 
-      // populate models
+      // Populate model dropdown
       function refreshModels() {
         const svc = serviceSelect.value;
         modelSelect.innerHTML = '';
@@ -213,25 +213,24 @@
         refreshModels();
         apiKeyLabel.textContent = serviceDisplay[serviceSelect.value] + ' API Key:';
       });
-
-      // initial setup
       refreshModels();
       apiKeyLabel.textContent = serviceDisplay[serviceSelect.value] + ' API Key:';
 
-      // save key
+      // Save API key
       saveKeyBtn.addEventListener('click', () => {
-        const key = document.getElementById('apiKey').value.trim();
+        const keyElem = document.getElementById('apiKey');
+        const key = keyElem.value.trim();
         const svc = serviceSelect.value;
         if (!key) return alert('Please enter a valid key.');
         localStorage.setItem(`${svc}_api_key`, key);
         alert(`${serviceDisplay[svc]} key saved!`);
-        document.getElementById('apiKey').value = '';
+        keyElem.value = '';
       });
 
-      // format bot messages
+      // Render markdown & add copy buttons
       function formatMessage(msg) {
         const div = document.createElement('div');
-        div.innerHTML = marked.parse(msg, { gfm:true, breaks:true });
+        div.innerHTML = marked.parse(msg, { gfm: true, breaks: true });
         div.querySelectorAll('pre code').forEach(cb => {
           const btn = document.createElement('button');
           btn.className = 'copy-button';
@@ -243,21 +242,28 @@
         return div.innerHTML;
       }
 
-      // clear chat
-      clearBtn.onclick = () => {
+      // Append HTML and auto-scroll
+      function appendAndScroll(html) {
+        chatMessages.innerHTML += html;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // Clear chat
+      clearBtn.addEventListener('click', () => {
         chatMessages.innerHTML = '';
         conversation.splice(1);
-      };
+        chatMessages.scrollTop = 0;
+      });
 
-      // copy last reply
-      copyBtn.onclick = () => {
+      // Copy last bot reply
+      copyBtn.addEventListener('click', () => {
         const bots = chatMessages.querySelectorAll('.message.bot');
         if (!bots.length) return alert('No reply to copy.');
-        const text = bots[bots.length - 1].innerText.replace(/^[^:]+:\s*/,'');
+        const text = bots[bots.length - 1].innerText.replace(/^[^:]+:\s*/, '');
         navigator.clipboard.writeText(text).then(() => alert('Last reply copied!'));
-      };
+      });
 
-      // handle Cmd+Enter / Ctrl+Enter
+      // Ctrl/Cmd+Enter to send
       userArea.addEventListener('keydown', e => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
           e.preventDefault();
@@ -265,17 +271,16 @@
         }
       });
 
-      // send
-      sendBtn.onclick = async () => {
+      // Send message
+      sendBtn.addEventListener('click', async () => {
         const svc = serviceSelect.value;
         const key = localStorage.getItem(`${svc}_api_key`);
         if (!key) return alert(`Set your ${serviceDisplay[svc]} key first.`);
         const userText = userArea.value.trim();
         if (!userText) return alert('Please type a message.');
 
-        // add to context & UI
         conversation.push({ role: 'user', content: userText });
-        chatMessages.innerHTML += `<div class="message user">You: ${userText}</div>`;
+        appendAndScroll(`<div class="message user">You: ${userText}</div>`);
         userArea.value = '';
 
         try {
@@ -294,20 +299,19 @@
           const data = await res.json();
           const reply = data.choices[0].message.content;
 
-          // add assistant reply to context & UI
           conversation.push({ role: 'assistant', content: reply });
           if (conversation.length > MAX_MESSAGES) {
             conversation.splice(1, conversation.length - MAX_MESSAGES);
           }
 
-          chatMessages.innerHTML +=
-            `<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`;
+          appendAndScroll(
+            `<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`
+          );
         } catch (e) {
-          chatMessages.innerHTML += `<div class="message bot">Error: ${e.message}</div>`;
+          appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`);
         }
-      };
+      });
     });
   </script>
 </body>
 </html>
-
