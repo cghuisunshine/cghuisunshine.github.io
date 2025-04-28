@@ -48,6 +48,7 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       word-wrap: break-word;
+      padding-bottom: 140px;
     }
 
     /* fixed input area */
@@ -299,15 +300,20 @@
       }, ms);
     }
 
-    /* ——— your existing code ——— */
+   
     copyBtn.addEventListener('click', () => {
       const bots = chatMessages.querySelectorAll('.message.bot');
       if (!bots.length) return autoAlert('No reply to copy.');
-      const text = bots[bots.length - 1].innerText.replace(/^[^:]+:\s*/, '');
-      navigator.clipboard.writeText(text)
-        .then(() => autoAlert('Last reply copied!'))
-        .catch(()  => autoAlert('Copy failed.'));
+
+      const raw        = bots[bots.length - 1].innerText.replace(/^[^:]+:\s*/, '');
+      const previewLen = 120;                          // toast preview length
+      const preview    = raw.length > previewLen ? raw.slice(0, previewLen) + '…' : raw;
+
+      navigator.clipboard.writeText(raw)
+        .then(() => autoAlert(`Copied:\n${preview}`))
+        .catch(() =>  autoAlert('Copy failed.'));
     });
+
 
 
 
