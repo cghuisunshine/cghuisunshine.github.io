@@ -181,6 +181,7 @@
       }
 
       /* ---------- copy last ---------- */
+      //when copy, empty lines at the last part should be removed, ai!
       copyBtn.addEventListener('click',()=>{
         const bots=chatMessages.querySelectorAll('.message.bot');
         if(!bots.length) return autoAlert('No reply to copy.');
