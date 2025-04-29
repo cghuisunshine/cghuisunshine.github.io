@@ -271,11 +271,19 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
         hideAC();
       }
       function showAC(){
-        const {left,top}=userArea.getBoundingClientRect();
+        const {left, top, height} = userArea.getBoundingClientRect();
+        const scrollTop = window.scrollY || window.pageYOffset;
+        const isMobile = window.innerWidth <= 600; // Simple mobile detection based on viewport width
+        
         acBox.innerHTML=COMMANDS.map(c=>`<div data-cmd="${c}" style="padding:4px 8px;cursor:pointer">${c}</div>`).join('');
-        acBox.style.left=(left+6)+'px';
-        acBox.style.top =(top +4)+'px';
-        acBox.style.display='block';
+        acBox.style.left = (left + 6) + 'px';
+        if (isMobile) {
+          // On mobile, position it just above the textarea considering the keyboard might be up
+          acBox.style.top = (top + scrollTop - 10) + 'px'; // Adjust offset for better visibility
+        } else {
+          acBox.style.top = (top + scrollTop + 4) + 'px'; // Position at the input on desktop
+        }
+        acBox.style.display = 'block';
       }
       const hideAC=()=>acBox.style.display='none';
 
