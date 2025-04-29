@@ -133,15 +133,38 @@
     .auto-alert.show  { opacity: 1; }  /* after insertion */
     .auto-alert.hide  { opacity: 0; }  /* before removal */
 
+    /* put menu and checkbox on the same row */
+#topBar {
+      display: flex;
+      align-items: center;
+      gap: 8px;           /* space between ☰ and the label */
+      margin-bottom: 10px;/* keeps existing spacing under the row */
+    }
+
+#translateToggle {
+      font-size: 1rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+#translateToggle input { margin-right: 4px; }
+
+
   </style>
 </head>
 <body>
   <div id="chat-container">
-    <div id="hamburgerMenu" role="button" tabindex="0" aria-label="Toggle menu">☰</div>
-    <label id="translateToggle" style="margin-left:8px; cursor:pointer; user-select:none;">
-    <input type="checkbox" id="translateOnly" style="margin-right:4px;">
-    Translate Only
-    </label>
+    
+    <!-- top bar: menu + translate-only switch -->
+    <div id="topBar">
+      <div id="hamburgerMenu" role="button" tabindex="0" aria-label="Toggle menu">☰</div>
+
+      <label id="translateToggle">
+        <input type="checkbox" id="translateOnly">
+        Translate Only
+      </label>
+    </div>
+
 
     <div id="apiKeyWrapper">
       <label for="apiKey">API Key:</label>
