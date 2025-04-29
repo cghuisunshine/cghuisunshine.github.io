@@ -217,7 +217,9 @@
         }
 
         userArea.value='';
-        appendAndScroll(`<div class="message user">You: ${rawInput}</div>`);
+        // Display the message without the command
+        const displayInput = cmdInfo ? cmdInfo.body : rawInput;
+        appendAndScroll(`<div class="message user">You: ${displayInput}</div>`);
 
         const wantTranslation=forceTranslate||(translateOnly.checked&&!forceRefine);
         let messagesForApi;
