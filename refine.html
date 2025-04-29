@@ -181,11 +181,10 @@
       }
 
       /* ---------- copy last ---------- */
-      //when copy, empty lines at the last part should be removed, ai!
       copyBtn.addEventListener('click',()=>{
         const bots=chatMessages.querySelectorAll('.message.bot');
         if(!bots.length) return autoAlert('No reply to copy.');
-        const raw=bots[bots.length-1].innerText.replace(/^[^:]+:\s*/,'');
+        const raw=bots[bots.length-1].innerText.replace(/^[^:]+:\s*/,'').trimEnd();
         const previewLen=120;
         const preview=raw.length>previewLen?raw.slice(0,previewLen)+'…':raw;
         navigator.clipboard.writeText(raw)
