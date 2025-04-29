@@ -252,6 +252,11 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           }
 
           appendAndScroll(`<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`);
+          
+          // Automatically copy the reply to clipboard
+          navigator.clipboard.writeText(reply)
+            .then(() => autoAlert('Reply copied to clipboard!'))
+            .catch(() => autoAlert('Failed to copy reply to clipboard.'));
         }catch(e){
           appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`);
         }
