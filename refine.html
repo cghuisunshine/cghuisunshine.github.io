@@ -256,9 +256,29 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           // Automatically copy the reply to clipboard with preview
           const previewLen=120;
           const preview=reply.length>previewLen?reply.slice(0,previewLen)+'…':reply;
-          navigator.clipboard.writeText(reply)
-            .then(() => autoAlert(`Copied:\n${preview}`))
-            .catch(() => autoAlert('Failed to copy reply to clipboard.'));
+          
+          // Check if clipboard API is supported
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(reply)
+              .then(() => autoAlert(`Copied:\n${preview}`))
+              .catch(() => {
+                // Fallback for iOS or other browsers where clipboard API fails
+                try {
+                  const textarea = document.createElement('textarea');
+                  textarea.value = reply;
+                  document.body.appendChild(textarea);
+                  textarea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textarea);
+                  autoAlert(`Copied (fallback):\n${preview}`);
+                } catch (err) {
+                  autoAlert('Failed to copy reply to clipboard. Please manually copy the text.');
+                }
+              });
+          } else {
+            // If clipboard API is not supported, inform the user
+            autoAlert('Clipboard copying not supported. Please manually copy the text.');
+          }
         }catch(e){
           appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`);
         }
