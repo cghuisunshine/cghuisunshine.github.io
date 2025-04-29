@@ -138,6 +138,10 @@
 <body>
   <div id="chat-container">
     <div id="hamburgerMenu" role="button" tabindex="0" aria-label="Toggle menu">☰</div>
+    <label id="translateToggle" style="margin-left:8px; cursor:pointer; user-select:none;">
+    <input type="checkbox" id="translateOnly" style="margin-right:4px;">
+    Translate Only
+    </label>
 
     <div id="apiKeyWrapper">
       <label for="apiKey">API Key:</label>
@@ -327,45 +331,73 @@
 
       // Send message
       sendBtn.addEventListener('click', async () => {
-        const svc = serviceSelect.value;
-        const key = localStorage.getItem(`${svc}_api_key`);
-        if (!key) return alert(`Set your ${serviceDisplay[svc]} key first.`);
-        const userText = userArea.value.trim();
-        if (!userText) return alert('Please type a message.');
+          const svc = serviceSelect.value;
+          const key = localStorage.getItem(`${svc}_api_key`);
+          if (!key) return alert(`Set your ${serviceDisplay[svc]} key first.`);
 
-        conversation.push({ role: 'user', content: userText });
-        appendAndScroll(`<div class="message user">You: ${userText}</div>`);
-        userArea.value = '';
+          const userText = userArea.value.trim();
+          if (!userText) return alert('Please type a message.');
 
-        try {
-          const res = await fetch(serviceEndpoint[svc], {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${key}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              model: modelSelect.value,
-              messages: conversation
-            })
-          });
-          if (!res.ok) throw new Error(res.statusText);
-          const data = await res.json();
-          const reply = data.choices[0].message.content;
+          /* show the user’s message in the thread */
+          appendAndScroll(`<div class="message user">You: ${userText}</div>`);
+          userArea.value = '';
 
-          conversation.push({ role: 'assistant', content: reply });
-          if (conversation.length > MAX_MESSAGES) {
-            conversation.splice(1, conversation.length - MAX_MESSAGES);
+          /* ----------------------------------------------------------------
+             Build the messages we’ll actually send to the model
+             ---------------------------------------------------------------- */
+          let messagesForApi;
+          if (translateOnly.checked) {
+            /* translation mode: EN ⇄ ZH  */
+            messagesForApi = [
+              {
+                role : 'system',
+                content : `You are a bilingual translation assistant.
+        If the user text is in **English**, translate it **into Chinese**.
+        If it is in **Chinese**, translate it **into English**.
+        Preserve meaning, style, tone, and formatting, and **output only the translation; no extra commentary or code fences**.`
+              },
+              { role : 'user', content : userText }
+            ];
+          } else {
+            /* normal “refine or translate to native English” mode */
+            conversation.push({ role: 'user', content: userText });
+            messagesForApi = conversation;
           }
 
-          appendAndScroll(
-            `<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`
-          );
-        } catch (e) {
-          appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`);
-        }
-      });
-    });
+          try {
+            const res = await fetch(serviceEndpoint[svc], {
+              method  : 'POST',
+              headers : {
+                'Authorization': `Bearer ${key}`,
+                'Content-Type' : 'application/json'
+              },
+              body : JSON.stringify({
+                model    : modelSelect.value,
+                messages : messagesForApi
+              })
+            });
+            if (!res.ok) throw new Error(res.statusText);
+
+            const data  = await res.json();
+            const reply = data.choices[0].message.content;
+
+            /* keep chat memory only in non-translation mode */
+            if (!translateOnly.checked) {
+              conversation.push({ role: 'assistant', content: reply });
+              if (conversation.length > MAX_MESSAGES) {
+                conversation.splice(1, conversation.length - MAX_MESSAGES);
+              }
+            }
+
+            appendAndScroll(
+              `<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`
+            );
+          } catch (e) {
+            appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`);
+          }
+        });
+
+   });
   </script>
 </body>
 </html>
