@@ -191,18 +191,7 @@
           navigator.clipboard.writeText(raw)
             .then(()=>autoAlert(`Copied:\n${preview}`))
             .catch(() => {
-              // Fallback for iOS or other browsers where clipboard API fails
-              try {
-                const textarea = document.createElement('textarea');
-                textarea.value = raw;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                autoAlert(`Copied (fallback):\n${preview}`);
-              } catch (err) {
-                // Fail silently
-              }
+              // Fail silently
             });
         }
       });
@@ -277,18 +266,7 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
             navigator.clipboard.writeText(reply)
               .then(() => autoAlert(`Copied:\n${preview}`))
               .catch(() => {
-                // Fallback for iOS or other browsers where clipboard API fails
-                try {
-                  const textarea = document.createElement('textarea');
-                  textarea.value = reply;
-                  document.body.appendChild(textarea);
-                  textarea.select();
-                  document.execCommand('copy');
-                  document.body.removeChild(textarea);
-                  autoAlert(`Copied (fallback):\n${preview}`);
-                } catch (err) {
-                  // Fail silently
-                }
+                // Fail silently
               });
           } else {
             // Fail silently if clipboard API is not supported
