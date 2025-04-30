@@ -187,9 +187,24 @@
         const raw=bots[bots.length-1].innerText.replace(/^[^:]+:\s*/,'').trimEnd();
         const previewLen=120;
         const preview=raw.length>previewLen?raw.slice(0,previewLen)+'…':raw;
-        navigator.clipboard.writeText(raw)
-          .then(()=>autoAlert(`Copied:\n${preview}`))
-          .catch(()=>autoAlert('Copy failed.'));
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(raw)
+            .then(()=>autoAlert(`Copied:\n${preview}`))
+            .catch(() => {
+              // Fallback for iOS or other browsers where clipboard API fails
+              try {
+                const textarea = document.createElement('textarea');
+                textarea.value = raw;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                autoAlert(`Copied (fallback):\n${preview}`);
+              } catch (err) {
+                // Fail silently
+              }
+            });
+        }
       });
 
       /* ---------- Ctrl/Cmd+Enter ---------- */
@@ -272,12 +287,11 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
                   document.body.removeChild(textarea);
                   autoAlert(`Copied (fallback):\n${preview}`);
                 } catch (err) {
-                  autoAlert('Failed to copy reply to clipboard. Please manually copy the text.');
+                  // Fail silently
                 }
               });
           } else {
-            // If clipboard API is not supported, inform the user
-            autoAlert('Clipboard copying not supported. Please manually copy the text.');
+            // Fail silently if clipboard API is not supported
           }
         }catch(e){
           appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`);
