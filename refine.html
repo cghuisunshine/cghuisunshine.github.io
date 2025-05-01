@@ -299,11 +299,13 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
       document.body.append(acBox);
 
       function insertCmd(cmd){
-        /* Replace the typed slash, add trailing space, caret after space */
-        const caretPos=userArea.selectionStart;
-        const firstSlash=userArea.value.lastIndexOf('/',caretPos-1);
-        const start=firstSlash>=0?firstSlash:0;
-        userArea.setRangeText(cmd+' ',start,caretPos,'end'); // 'end' leaves cursor after space
+        /* Replace the typed slash or space, add trailing space, caret after space */
+        const caretPos = userArea.selectionStart;
+        const value = userArea.value;
+        const firstSlash = value.lastIndexOf('/', caretPos - 1);
+        const firstSpace = value.lastIndexOf(' ', caretPos - 1);
+        const start = Math.max(firstSlash, firstSpace) >= 0 ? Math.max(firstSlash, firstSpace) : 0;
+        userArea.setRangeText(cmd + ' ', start, caretPos, 'end'); // 'end' leaves cursor after space
         userArea.focus();
         hideAC();
       }
@@ -324,12 +326,12 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
       }
       const hideAC=()=>acBox.style.display='none';
 
-      userArea.addEventListener('keydown',e=>{
-        if(e.key==='/'&&userArea.selectionStart===0){
-          setTimeout(showAC);                // show menu after slash
-        }else if(e.key==='Escape'){
+      userArea.addEventListener('keydown', e => {
+        if ((e.key === '/' || e.key === ' ') && userArea.selectionStart === 0) {
+          setTimeout(showAC); // show menu after slash or space
+        } else if (e.key === 'Escape') {
           hideAC();
-        }else if(e.key==='Enter'){
+        } else if (e.key === 'Enter') {
           hideAC();
         }
       });
