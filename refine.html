@@ -71,8 +71,16 @@
       /* ---------- slash-command helpers ---------- */
       const COMMANDS = ['/translate', '/refine', '/explain'];
       function startsWithCmd(txt){
-        const cmd = COMMANDS.find(c=>txt.toLowerCase().startsWith(c));
-        return cmd ? {cmd,body:txt.slice(cmd.length).trimStart()} : null;
+        if (txt.length === 0) return null;
+        // Check for both '/' and ' ' as command prefixes
+        let prefix = '/';
+        let checkText = txt;
+        if (txt.startsWith(' ') && !txt.startsWith('  ')) {
+          prefix = ' ';
+          checkText = txt.trimStart();
+        }
+        const cmd = COMMANDS.find(c => checkText.toLowerCase().startsWith(c.toLowerCase()) && txt.startsWith(prefix));
+        return cmd ? {cmd, body: checkText.slice(cmd.length).trimStart()} : null;
       }
 
       /* ---------- element refs ---------- */
