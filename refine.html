@@ -56,7 +56,7 @@
   </div>
 
   <div id="inputWrapper">
-    <textarea id="userMessage" placeholder="Type your message… to refine or translate (/translate or /refine to override)"></textarea>
+    <textarea id="userMessage" placeholder="Type your message… to refine or translate (/translate, /refine, or /explain to override)"></textarea>
     <div class="controls">
       <button id="sendMessageButton">Send</button>
       <button id="clearChatButton">Clear</button>
@@ -69,7 +69,7 @@
     document.addEventListener('DOMContentLoaded', () => {
 
       /* ---------- slash-command helpers ---------- */
-      const COMMANDS = ['/translate','/refine'];
+      const COMMANDS = ['/translate', '/refine', '/explain'];
       function startsWithCmd(txt){
         const cmd = COMMANDS.find(c=>txt.toLowerCase().startsWith(c));
         return cmd ? {cmd,body:txt.slice(cmd.length).trimStart()} : null;
@@ -106,6 +106,16 @@
 
       /* ---------- conversation state ---------- */
       const systemPrompt=`Task: Review the input text. If it is not in English, translate it into clear, idiomatic, native-level English, preserving the original meaning, tone, and any important formatting. If it is already in English, refine it so it reads as if written by an educated native speaker—correct grammar, improve word choice, and enhance flow and clarity—while keeping the author’s intended meaning and style intact. Output only the improved English text, with no added explanations or notes.`;
+      const explainPrompt=`Your instructors have given me answers to all questions that I understand; I am now looking to see if you can completely and clearly explain your answers. 
+
+For people at my level, examples can be helpful. 
+If you are writing code, you need to explain what the code means as you write (and I need to see it in the screencast)
+Check the question, and answer all of the question.
+Key to all your answers is that you are speaking to me, so you must adjust your knowledge for my level of understanding, which is very limited technically. 
+
+In Comm you practised how to be clear, concise, correct, complete, concrete, coherent, and courteous. Try to put these to use.
+
+And make it an oral script that I can read it out. At the bottom of it summarize in key points for me easy to remember, when I can't read the script.`;
       const MAX_PAIRS=10, MAX_MESSAGES=1+MAX_PAIRS*2;
       const conversation=[{role:'system',content:systemPrompt}];
 
@@ -212,11 +222,12 @@
 
         /* slash command detect */
         const cmdInfo=startsWithCmd(rawInput);
-        let forceTranslate=false,forceRefine=false;
+        let forceTranslate=false, forceRefine=false, forceExplain=false;
         if(cmdInfo){
           rawInput=cmdInfo.body;
           forceTranslate=cmdInfo.cmd==='/translate';
-          forceRefine   =cmdInfo.cmd==='/refine';
+          forceRefine=cmdInfo.cmd==='/refine';
+          forceExplain=cmdInfo.cmd==='/explain';
           if(!rawInput) return alert('Nothing to send after the command.');
         }
 
@@ -225,7 +236,7 @@
         const displayInput = cmdInfo ? cmdInfo.body : rawInput;
         appendAndScroll(`<div class="message user">You: ${displayInput}</div>`);
 
-        const wantTranslation=forceTranslate||(translateOnly.checked&&!forceRefine);
+        const wantTranslation=forceTranslate||(translateOnly.checked&&!forceRefine&&!forceExplain);
         let messagesForApi;
         if(wantTranslation){
           messagesForApi=[
@@ -235,7 +246,12 @@ If it is in **Chinese**, translate it **into English**.
 Preserve meaning, style, tone, and formatting, and **output only the translation; no extra commentary or code fences**.`},
             {role:'user',content:rawInput}
           ];
-        }else{
+        } else if(forceExplain){
+          messagesForApi=[
+            {role:'system',content:explainPrompt},
+            {role:'user',content:rawInput}
+          ];
+        } else {
           conversation.push({role:'user',content:rawInput});
           messagesForApi=conversation;
         }
@@ -250,7 +266,7 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           const data=await res.json();
           const reply=data.choices[0].message.content;
 
-          if(!wantTranslation){
+          if(!wantTranslation && !forceExplain){
             conversation.push({role:'assistant',content:reply});
             if(conversation.length>MAX_MESSAGES) conversation.splice(1,conversation.length-MAX_MESSAGES);
           }
