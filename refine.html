@@ -43,7 +43,7 @@
       <select id="serviceSelect">
         <option value="openai">OpenAI</option>
         <option value="deepseek">DeepSeek</option>
-        <option value="grok" selected>Grok</option>
+        <option value="grok">Grok</option>
       </select>
     </div>
 
@@ -135,6 +135,14 @@ And make it an oral script that I can read it out. At the bottom of it summarize
         modelWrapper.style.display=show?'block':'none';
       });
 
+      /* ---------- Set default service ---------- */
+      const savedService = localStorage.getItem('lastUsedService');
+      if (savedService && serviceSelect.querySelector(`option[value="${savedService}"]`)) {
+        serviceSelect.value = savedService;
+      } else {
+        serviceSelect.value = 'grok';
+      }
+
       /* ---------- model dropdown ---------- */
       function refreshModels(){
         const svc=serviceSelect.value;
@@ -147,6 +155,7 @@ And make it an oral script that I can read it out. At the bottom of it summarize
       serviceSelect.addEventListener('change',()=>{
         refreshModels();
         apiKeyLabel.textContent=serviceDisplay[serviceSelect.value]+' API Key:';
+        localStorage.setItem('lastUsedService', serviceSelect.value);
       });
       refreshModels();
       apiKeyLabel.textContent=serviceDisplay[serviceSelect.value]+' API Key:';
