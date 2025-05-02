@@ -69,7 +69,7 @@
     document.addEventListener('DOMContentLoaded', () => {
 
       /* ---------- slash-command helpers ---------- */
-      const COMMANDS = ['/translate', '/refine', '/explain', '/reply'];
+      const COMMANDS = ['/translate', '/refine', '/explain', '/reply', '/reply-'];
       function startsWithCmd(txt){
         if (txt.length === 0) return null;
         // Check for both '/' and ' ' as command prefixes
@@ -125,6 +125,7 @@ In Comm you practised how to be clear, concise, correct, complete, concrete, coh
 
 And make it an oral script that I can read it out. At the bottom of it summarize in key points for me easy to remember, when I can't read the script.`;
       const replyPrompt=`You are an assistant tasked with generating a thoughtful and relevant reply to the user's input. Ensure that your response is clear, concise, and maintains the tone and context of the conversation. Output only the reply, with no additional commentary or explanations.`;
+      const replyNegativePrompt=`You are an assistant tasked with generating a thoughtful but negative-toned reply to the user's input. Ensure that your response is clear, concise, and maintains a critical or dissenting perspective while still being relevant to the context of the conversation. Output only the reply, with no additional commentary or explanations.`;
       const MAX_PAIRS=10, MAX_MESSAGES=1+MAX_PAIRS*2;
       const conversation=[{role:'system',content:systemPrompt}];
 
@@ -240,13 +241,14 @@ And make it an oral script that I can read it out. At the bottom of it summarize
 
         /* slash command detect */
         const cmdInfo=startsWithCmd(rawInput);
-        let forceTranslate=false, forceRefine=false, forceExplain=false, forceReply=false;
+        let forceTranslate=false, forceRefine=false, forceExplain=false, forceReply=false, forceReplyNegative=false;
         if(cmdInfo){
           rawInput=cmdInfo.body;
           forceTranslate=cmdInfo.cmd==='/translate';
           forceRefine=cmdInfo.cmd==='/refine';
           forceExplain=cmdInfo.cmd==='/explain';
           forceReply=cmdInfo.cmd==='/reply';
+          forceReplyNegative=cmdInfo.cmd==='/reply-';
           if(!rawInput) return alert('Nothing to send after the command.');
         }
 
@@ -255,7 +257,7 @@ And make it an oral script that I can read it out. At the bottom of it summarize
         const displayInput = cmdInfo ? cmdInfo.body : rawInput;
         appendAndScroll(`<div class="message user">You: ${displayInput}</div>`);
 
-        const wantTranslation=forceTranslate||(translateOnly.checked&&!forceRefine&&!forceExplain&&!forceReply);
+        const wantTranslation=forceTranslate||(translateOnly.checked&&!forceRefine&&!forceExplain&&!forceReply&&!forceReplyNegative);
         let messagesForApi;
         if(wantTranslation){
           messagesForApi=[
@@ -275,6 +277,11 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
             {role:'system',content:replyPrompt},
             {role:'user',content:rawInput}
           ];
+        } else if(forceReplyNegative){
+          messagesForApi=[
+            {role:'system',content:replyNegativePrompt},
+            {role:'user',content:rawInput}
+          ];
         } else {
           conversation.push({role:'user',content:rawInput});
           messagesForApi=conversation;
@@ -290,7 +297,7 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           const data=await res.json();
           const reply=data.choices[0].message.content;
 
-          if(!wantTranslation && !forceExplain && !forceReply){
+          if(!wantTranslation && !forceExplain && !forceReply && !forceReplyNegative){
             conversation.push({role:'assistant',content:reply});
             if(conversation.length>MAX_MESSAGES) conversation.splice(1,conversation.length-MAX_MESSAGES);
           }
