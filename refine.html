@@ -353,10 +353,8 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
       userArea.addEventListener('keydown', e => {
         if ((e.key === '/' || e.key === ' ') && userArea.selectionStart === 0) {
           setTimeout(showAC); // show menu after slash or space
-        } else if (e.key === 'Escape') {
-          hideAC();
-        } else if (e.key === 'Enter') {
-          hideAC();
+        } else if (acBox.style.display === 'block') {
+          hideAC(); // hide on any key press if autocomplete is visible
         }
       });
 
