@@ -224,7 +224,7 @@ And make it an oral script that I can read it out. At the bottom of it summarize
       });
 
       /* ---------- toast ---------- */
-      function autoAlert(msg,ms=3000){
+      function autoAlert(msg,ms=2000){
         const box=document.createElement('div');
         box.className='auto-alert'; box.textContent=msg; document.body.appendChild(box);
         requestAnimationFrame(()=>box.classList.add('show'));
