@@ -142,12 +142,19 @@ And make it an oral script that I can read it out. At the bottom of it summarize
         modelWrapper.style.display=show?'block':'none';
       });
 
-      /* ---------- Set default service ---------- */
+      /* ---------- Set default service and action ---------- */
       const savedService = localStorage.getItem('lastUsedService');
       if (savedService && serviceSelect.querySelector(`option[value="${savedService}"]`)) {
         serviceSelect.value = savedService;
       } else {
         serviceSelect.value = 'grok';
+      }
+
+      const savedAction = localStorage.getItem('lastUsedAction');
+      if (savedAction && actionSelect.querySelector(`option[value="${savedAction}"]`)) {
+        actionSelect.value = savedAction;
+      } else {
+        actionSelect.value = 'refine';
       }
 
       /* ---------- model dropdown ---------- */
@@ -163,6 +170,10 @@ And make it an oral script that I can read it out. At the bottom of it summarize
         refreshModels();
         apiKeyLabel.textContent=serviceDisplay[serviceSelect.value]+' API Key:';
         localStorage.setItem('lastUsedService', serviceSelect.value);
+      });
+
+      actionSelect.addEventListener('change', () => {
+        localStorage.setItem('lastUsedAction', actionSelect.value);
       });
       refreshModels();
       apiKeyLabel.textContent=serviceDisplay[serviceSelect.value]+' API Key:';
