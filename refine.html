@@ -61,11 +61,11 @@
   </div>
 
   <div id="inputWrapper">
-    <textarea id="userMessage" placeholder="Type your message… to refine"></textarea>
+    <textarea id="userMessage" placeholder="Type your message to refine …"></textarea>
     <div class="controls">
       <button id="sendMessageButton">Send</button>
       <button id="clearChatButton">Clear</button>
-      <button id="copyLastButton">Copy Reply</button>
+      <button id="copyLastButton">Copy Result</button>
     </div>
   </div>
 
@@ -180,7 +180,7 @@ And make it an oral script that I can read it out. At the bottom of it summarize
       // Update placeholder on page load
       function updatePlaceholder() {
         const selectedAction = actionSelect.value;
-        userArea.placeholder = `Type your message… to ${selectedAction} (press space and select if you want to override temporarily)`;
+        userArea.placeholder = `Type your message to ${selectedAction}… (press space and select if you want to override temporarily)`;
       }
       updatePlaceholder();
       refreshModels();
