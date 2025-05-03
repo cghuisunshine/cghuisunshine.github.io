@@ -61,7 +61,7 @@
   </div>
 
   <div id="inputWrapper">
-    <textarea id="userMessage" placeholder="Type your message… to refine (select other option from dropdown to override)"></textarea>
+    <textarea id="userMessage" placeholder="Type your message… to refine"></textarea>
     <div class="controls">
       <button id="sendMessageButton">Send</button>
       <button id="clearChatButton">Clear</button>
@@ -174,7 +174,15 @@ And make it an oral script that I can read it out. At the bottom of it summarize
 
       actionSelect.addEventListener('change', () => {
         localStorage.setItem('lastUsedAction', actionSelect.value);
+        updatePlaceholder();
       });
+
+      // Update placeholder on page load
+      function updatePlaceholder() {
+        const selectedAction = actionSelect.value;
+        userArea.placeholder = `Type your message… to ${selectedAction}`;
+      }
+      updatePlaceholder();
       refreshModels();
       apiKeyLabel.textContent=serviceDisplay[serviceSelect.value]+' API Key:';
 
