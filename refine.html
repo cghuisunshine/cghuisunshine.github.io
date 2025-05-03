@@ -21,15 +21,20 @@
     .auto-alert{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);padding:18px 32px;background:#fff;color:#000;font:16px/1.4 system-ui,sans-serif;border:1px solid #ccc;border-radius:6px;box-shadow:0 6px 16px rgba(0,0,0,.25);z-index:10000;opacity:0;transition:opacity .25s ease}
     .auto-alert.show{opacity:1}.auto-alert.hide{opacity:0}
     #topBar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-    #translateToggle{font-size:1rem;cursor:pointer;user-select:none}
-    #translateToggle input{margin-right:4px}
+    #actionSelect{font-size:1rem;cursor:pointer;user-select:none;padding:5px}
   </style>
 </head>
 <body>
   <div id="chat-container">
     <div id="topBar">
       <div id="hamburgerMenu" role="button" tabindex="0" aria-label="Toggle menu">☰</div>
-      <label id="translateToggle"><input type="checkbox" id="translateOnly">Translate Only</label>
+      <select id="actionSelect">
+        <option value="refine">Refine</option>
+        <option value="translate">Translate</option>
+        <option value="explain">Explain</option>
+        <option value="reply">Reply</option>
+        <option value="reject">Reject</option>
+      </select>
     </div>
 
     <div id="apiKeyWrapper">
@@ -56,7 +61,7 @@
   </div>
 
   <div id="inputWrapper">
-    <textarea id="userMessage" placeholder="Type your message… to refine (press space and select other option to override)"></textarea>
+    <textarea id="userMessage" placeholder="Type your message… to refine (select other option from dropdown to override)"></textarea>
     <div class="controls">
       <button id="sendMessageButton">Send</button>
       <button id="clearChatButton">Clear</button>
@@ -97,7 +102,7 @@
       const clearBtn = document.getElementById('clearChatButton');
       const copyBtn = document.getElementById('copyLastButton');
       const apiKeyLabel = document.querySelector("label[for='apiKey']");
-      const translateOnly = document.getElementById('translateOnly');
+      const actionSelect = document.getElementById('actionSelect');
 
       /* ---------- service / model config ---------- */
       const serviceDisplay = {openai:'OpenAI',deepseek:'DeepSeek',grok:'Grok'};
@@ -257,9 +262,18 @@ And make it an oral script that I can read it out. At the bottom of it summarize
         const displayInput = cmdInfo ? cmdInfo.body : rawInput;
         appendAndScroll(`<div class="message user">You: ${displayInput}</div>`);
 
-        const wantTranslation=forceTranslate||(translateOnly.checked&&!forceRefine&&!forceExplain&&!forceReply&&!forceReplyNegative);
+        // Use the selected action from dropdown if no command is specified
+        if (!cmdInfo) {
+          const selectedAction = actionSelect.value;
+          forceTranslate = selectedAction === 'translate';
+          forceRefine = selectedAction === 'refine';
+          forceExplain = selectedAction === 'explain';
+          forceReply = selectedAction === 'reply';
+          forceReplyNegative = selectedAction === 'reject';
+        }
+
         let messagesForApi;
-        if(wantTranslation){
+        if(forceTranslate){
           messagesForApi=[
             {role:'system',content:`You are a bilingual translation assistant.
 If the user text is in **English**, translate it **into Chinese**.
@@ -297,7 +311,7 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           const data=await res.json();
           const reply=data.choices[0].message.content;
 
-          if(!wantTranslation && !forceExplain && !forceReply && !forceReplyNegative){
+          if(!forceTranslate && !forceExplain && !forceReply && !forceReplyNegative){
             conversation.push({role:'assistant',content:reply});
             if(conversation.length>MAX_MESSAGES) conversation.splice(1,conversation.length-MAX_MESSAGES);
           }
