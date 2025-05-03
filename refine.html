@@ -125,7 +125,7 @@ In Comm you practised how to be clear, concise, correct, complete, concrete, coh
 
 And make it an oral script that I can read it out. At the bottom of it summarize in key points for me easy to remember, when I can't read the script.`;
       const replyPrompt=`You are an assistant tasked with generating a thoughtful and relevant reply to the user's input. Ensure that your response is clear, concise, and maintains the tone and context of the conversation. Output only the reply, with no additional commentary or explanations.`;
-      const replyNegativePrompt=`You are an assistant tasked with generating a thoughtful but negative-toned reply to the user's input. Ensure that your response is clear, concise, and maintains a critical or dissenting perspective while still being relevant to the context of the conversation. Output only the reply, with no additional commentary or explanations.`;
+      const replyNegativePrompt=`You are an assistant tasked with generating a polite but firm rejection or negative response to the user's input, especially when it appears to be an invitation or request. Ensure that your response is clear, concise, and maintains a respectful tone while declining or expressing disagreement. Output only the reply, with no additional commentary or explanations.`;
       const MAX_PAIRS=10, MAX_MESSAGES=1+MAX_PAIRS*2;
       const conversation=[{role:'system',content:systemPrompt}];
 
