@@ -69,7 +69,7 @@
     document.addEventListener('DOMContentLoaded', () => {
 
       /* ---------- slash-command helpers ---------- */
-      const COMMANDS = ['/translate', '/refine', '/explain', '/reply', '/reply-'];
+      const COMMANDS = ['/translate', '/refine', '/explain', '/reply', '/rejection'];
       function startsWithCmd(txt){
         if (txt.length === 0) return null;
         // Check for both '/' and ' ' as command prefixes
@@ -248,7 +248,7 @@ And make it an oral script that I can read it out. At the bottom of it summarize
           forceRefine=cmdInfo.cmd==='/refine';
           forceExplain=cmdInfo.cmd==='/explain';
           forceReply=cmdInfo.cmd==='/reply';
-          forceReplyNegative=cmdInfo.cmd==='/reply-';
+          forceReplyNegative=cmdInfo.cmd==='/rejection';
           if(!rawInput) return alert('Nothing to send after the command.');
         }
 
