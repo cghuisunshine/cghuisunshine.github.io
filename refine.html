@@ -250,6 +250,23 @@ And make it an oral script that I can read it out. At the bottom of it summarize
         }
       });
 
+      /* ---------- double-click to copy ---------- */
+      chatMessages.addEventListener('dblclick', (e) => {
+        const message = e.target.closest('.message');
+        if (message) {
+          const raw = message.innerText.replace(/^[^:]+:\s*/,'').trimEnd();
+          const previewLen = 120;
+          const preview = raw.length > previewLen ? raw.slice(0, previewLen) + '…' : raw;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(raw)
+              .then(() => autoAlert(`Copied:\n${preview}`))
+              .catch(() => {
+                // Fail silently
+              });
+          }
+        }
+      });
+
       /* ---------- Ctrl/Cmd+Enter ---------- */
       userArea.addEventListener('keydown',e=>{
         if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();sendBtn.click();}
