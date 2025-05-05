@@ -267,9 +267,25 @@ And make it an oral script that I can read it out. At the bottom of it summarize
         }
       });
 
-      /* ---------- Ctrl/Cmd+Enter ---------- */
-      userArea.addEventListener('keydown',e=>{
-        if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();sendBtn.click();}
+      /* ---------- Ctrl/Cmd+Enter or Empty Line Enter ---------- */
+      userArea.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          sendBtn.click();
+        } else if (e.key === 'Enter' && !e.isComposing) {
+          const lines = userArea.value.split('\n');
+          const lastLine = lines[lines.length - 1].trim();
+          if (lastLine === '' && lines.length > 1 && lines[lines.length - 2].trim() !== '') {
+            e.preventDefault();
+            sendBtn.click();
+          }
+        }
+      });
+
+      /* ---------- Paste Event Handling ---------- */
+      userArea.addEventListener('paste', e => {
+        // Prevent any automatic send action on paste
+        e.stopPropagation();
       });
 
       /* ---------- SEND ---------- */
