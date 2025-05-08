@@ -132,7 +132,17 @@ In Comm you practised how to be clear, concise, correct, complete, concrete, coh
 And make it an oral script that I can read it out. At the bottom of it summarize in key points for me easy to remember, when I can't read the script. Output only the reply, with no additional commentary or explanations.`;
       const replyPrompt=`You are an assistant tasked with generating a thoughtful and relevant reply to the user's input. Ensure that your response is clear, concise, and maintains the tone and context of the conversation. Output only the reply, with no additional commentary or explanations.`;
       const replyNegativePrompt=`You are an assistant tasked with generating a polite but firm rejection or negative response to the user's input, especially when it appears to be an invitation or request. Ensure that your response is clear, concise, and maintains a respectful tone while declining or expressing disagreement. Output only the reply, with no additional commentary or explanations.`;
-      const similarPrompt=`You are an assistant tasked with providing 5 similar words in English that correspond to the user's input. Ensure that the words are relevant and maintain the context of the input. Output only the list of words, with no additional commentary or explanations.`;
+      const similarPrompt=`You are an assistant tasked with providing 5 similar words in English that correspond to the user's input. Ensure that the words are relevant and maintain the context of the input. For each word, provide a simple explanation of its meaning in relation to the input. Format your response as follows:
+
+**Input Word Explanation:** [Brief explanation of the input word]
+
+- [Similar Word 1]: [Simple explanation of meaning or relation to input]
+- [Similar Word 2]: [Simple explanation of meaning or relation to input]
+- [Similar Word 3]: [Simple explanation of meaning or relation to input]
+- [Similar Word 4]: [Simple explanation of meaning or relation to input]
+- [Similar Word 5]: [Simple explanation of meaning or relation to input]
+
+Output only the formatted content, with no additional commentary or explanations outside this format.`;
       const MAX_PAIRS=10, MAX_MESSAGES=1+MAX_PAIRS*2;
       const conversation=[{role:'system',content:systemPrompt}];
 
