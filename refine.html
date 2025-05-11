@@ -35,6 +35,7 @@
         <option value="reply">Reply</option>
         <option value="reject">Reject</option>
         <option value="similar">Similar</option>
+        <option value="orafy">Orafy</option>
       </select>
     </div>
 
@@ -75,7 +76,7 @@
     document.addEventListener('DOMContentLoaded', () => {
 
       /* ---------- slash-command helpers ---------- */
-      const COMMANDS = ['/translate', '/refine', '/explain', '/reply', '/reject', '/similar'];
+      const COMMANDS = ['/translate', '/refine', '/explain', '/reply', '/reject', '/similar', '/orafy'];
       function startsWithCmd(txt){
         if (txt.length === 0) return null;
         // Check for both '/' and ' ' as command prefixes
@@ -143,6 +144,7 @@ And make it an oral script that I can read it out. At the bottom of it summarize
 - [Similar Word 5]: [Simple explanation of meaning or relation to input]
 
 Output only the formatted content, with no additional commentary or explanations outside this format.`;
+      const orafyPrompt=`You are an assistant tasked with converting the user's input into an oral speaking style suitable for a speech or presentation. Ensure the text sounds natural, conversational, and engaging as if spoken aloud. Maintain the original meaning, tone, and context, but adjust phrasing, pacing, and emphasis to enhance oral delivery. Output only the converted text, with no additional commentary or explanations.`;
       const MAX_PAIRS=10, MAX_MESSAGES=1+MAX_PAIRS*2;
       const conversation=[{role:'system',content:systemPrompt}];
 
@@ -311,7 +313,7 @@ Output only the formatted content, with no additional commentary or explanations
 
         /* slash command detect */
         const cmdInfo=startsWithCmd(rawInput);
-        let forceTranslate=false, forceRefine=false, forceExplain=false, forceReply=false, forceReplyNegative=false, forceSimilar=false;
+        let forceTranslate=false, forceRefine=false, forceExplain=false, forceReply=false, forceReplyNegative=false, forceSimilar=false, forceOrafy=false;
         if(cmdInfo){
           rawInput=cmdInfo.body;
           forceTranslate=cmdInfo.cmd==='/translate';
@@ -320,6 +322,7 @@ Output only the formatted content, with no additional commentary or explanations
           forceReply=cmdInfo.cmd==='/reply';
           forceReplyNegative=cmdInfo.cmd==='/reject';
           forceSimilar=cmdInfo.cmd==='/similar';
+          forceOrafy=cmdInfo.cmd==='/orafy';
           if(!rawInput) return alert('Nothing to send after the command.');
         }
 
@@ -337,6 +340,7 @@ Output only the formatted content, with no additional commentary or explanations
           forceReply = selectedAction === 'reply';
           forceReplyNegative = selectedAction === 'reject';
           forceSimilar = selectedAction === 'similar';
+          forceOrafy = selectedAction === 'orafy';
         }
 
         let messagesForApi;
@@ -368,6 +372,11 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
             {role:'system',content:similarPrompt},
             {role:'user',content:rawInput}
           ];
+        } else if(forceOrafy){
+          messagesForApi=[
+            {role:'system',content:orafyPrompt},
+            {role:'user',content:rawInput}
+          ];
         } else {
           conversation.push({role:'user',content:rawInput});
           messagesForApi=conversation;
@@ -383,7 +392,7 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           const data=await res.json();
           const reply=data.choices[0].message.content;
 
-          if(!forceTranslate && !forceExplain && !forceReply && !forceReplyNegative && !forceSimilar){
+          if(!forceTranslate && !forceExplain && !forceReply && !forceReplyNegative && !forceSimilar && !forceOrafy){
             conversation.push({role:'assistant',content:reply});
             if(conversation.length>MAX_MESSAGES) conversation.splice(1,conversation.length-MAX_MESSAGES);
           }
