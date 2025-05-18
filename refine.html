@@ -146,7 +146,7 @@ And make it an oral script that I can read it out. At the bottom of it summarize
 
 Output only the formatted content, with no additional commentary or explanations outside this format.`;
       const orafyPrompt=`You are an assistant tasked with converting the user's input into an oral speaking style suitable for a speech or presentation. Ensure the text sounds natural, conversational, and engaging as if spoken aloud. Maintain the original meaning, tone, and context, but adjust phrasing, pacing, and emphasis to enhance oral delivery. Output only the converted text, with no additional commentary or explanations.`;
-      const intentReplyPrompt=`You are an assistant tasked with generating a response based on the user's specified intent and context. Ensure that your response aligns with the given intent and relates to the provided context. Output only the reply, with no additional commentary or explanations.`;
+      const intentReplyPrompt=`You are an assistant tasked with generating a response based on the user's specified intent and context. Ensure that your response aligns with the given intent, relates to the provided context, and is in English only. Output only the reply, with no additional commentary or explanations.`;
       const MAX_PAIRS=10, MAX_MESSAGES=1+MAX_PAIRS*2;
       const conversation=[{role:'system',content:systemPrompt}];
 
