@@ -70,6 +70,10 @@
       <button id="clearChatButton">Clear</button>
       <button id="copyLastButton">Copy</button>
       <button id="voiceInputButton">Voice</button>
+      <select id="voiceLangSelect">
+        <option value="en-US">English</option>
+        <option value="zh-CN">Chinese</option>
+      </select>
     </div>
   </div>
 
@@ -313,9 +317,15 @@ Output only the formatted content, with no additional commentary or explanations
         const recognition = new SpeechRecognition();
         recognition.continuous = false; // Set to false to stop after one utterance
         recognition.interimResults = true; // Show interim results
-        recognition.lang = 'en-US'; // Set language, can be changed based on user preference
+        recognition.lang = 'en-US'; // Default language
 
         let isRecognizing = false;
+
+        // Language selector for voice input
+        const voiceLangSelect = document.getElementById('voiceLangSelect');
+        voiceLangSelect.addEventListener('change', () => {
+          recognition.lang = voiceLangSelect.value;
+        });
 
         // 1) Outside of any handler, hold two variables:
         let originalContent = '';
