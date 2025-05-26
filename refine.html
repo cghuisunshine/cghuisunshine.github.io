@@ -317,8 +317,15 @@ Output only the formatted content, with no additional commentary or explanations
 
         let isRecognizing = false;
 
+        // 1) Outside of any handler, hold two variables:
+        let originalContent = '';
+        let finalTranscript = '';
+
+        // 2) When you start recognition, capture the current textarea value:
         voiceInputButton.addEventListener('click', () => {
           if (!isRecognizing) {
+            originalContent = userArea.value;  // grab whatever the user typed
+            finalTranscript   = '';            // reset any prior speech
             recognition.start();
             voiceInputButton.textContent = 'Stop Voice';
             isRecognizing = true;
@@ -329,25 +336,28 @@ Output only the formatted content, with no additional commentary or explanations
           }
         });
 
+        // 3) In onresult, append only new speech to finalTranscript, then rebuild once:
         recognition.onresult = (event) => {
           let interimTranscript = '';
-          let finalTranscript = '';
 
           for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
+            const t = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              finalTranscript += transcript;
+              finalTranscript += t;
             } else {
-              interimTranscript += transcript;
+              interimTranscript += t;
             }
           }
 
-          // Update the textarea with the recognized text
-          //why the following modification would introduce duplicated transcript text, fix it, ai!
-          let finalResult = userArea.value + finalTranscript + interimTranscript;
-          userArea.value = finalResult;
-          // userArea.value = finalTranscript + interimTranscript;
+          // Reconstruct: original content + a space + everything recognized so far
+          userArea.value = originalContent 
+                          + (originalContent.endsWith(' ') ? '' : ' ')
+                          + finalTranscript 
+                          + interimTranscript;
         };
+
+
+   
 
         recognition.onerror = (event) => {
           console.error('Speech recognition error:', event.error);
