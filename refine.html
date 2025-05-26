@@ -69,6 +69,7 @@
       <button id="sendMessageButton">Send</button>
       <button id="clearChatButton">Clear</button>
       <button id="copyLastButton">Copy</button>
+      <button id="voiceInputButton">Voice</button>
     </div>
   </div>
 
@@ -303,6 +304,64 @@ Output only the formatted content, with no additional commentary or explanations
         // Prevent any automatic send action on paste
         e.stopPropagation();
       });
+
+      /* ---------- Voice Input ---------- */
+      const voiceInputButton = document.getElementById('voiceInputButton');
+      // Check if the browser supports the Web Speech API
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false; // Set to false to stop after one utterance
+        recognition.interimResults = true; // Show interim results
+        recognition.lang = 'en-US'; // Set language, can be changed based on user preference
+
+        let isRecognizing = false;
+
+        voiceInputButton.addEventListener('click', () => {
+          if (!isRecognizing) {
+            recognition.start();
+            voiceInputButton.textContent = 'Stop Voice';
+            isRecognizing = true;
+          } else {
+            recognition.stop();
+            voiceInputButton.textContent = 'Voice';
+            isRecognizing = false;
+          }
+        });
+
+        recognition.onresult = (event) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+
+          // Update the textarea with the recognized text
+          userArea.value = finalTranscript + interimTranscript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          autoAlert('Voice input error: ' + event.error);
+          voiceInputButton.textContent = 'Voice';
+          isRecognizing = false;
+        };
+
+        recognition.onend = () => {
+          voiceInputButton.textContent = 'Voice';
+          isRecognizing = false;
+        };
+      } else {
+        voiceInputButton.disabled = true;
+        voiceInputButton.textContent = 'Voice (Unsupported)';
+        console.log('Speech Recognition API not supported in this browser.');
+      }
 
       /* ---------- SEND ---------- */
       sendBtn.addEventListener('click',async()=>{
