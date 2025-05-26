@@ -343,7 +343,10 @@ Output only the formatted content, with no additional commentary or explanations
           }
 
           // Update the textarea with the recognized text
-          userArea.value = finalTranscript + interimTranscript;
+          //why the following modification would introduce duplicated transcript text, fix it, ai!
+          let finalResult = userArea.value + finalTranscript + interimTranscript;
+          userArea.value = finalResult;
+          // userArea.value = finalTranscript + interimTranscript;
         };
 
         recognition.onerror = (event) => {
