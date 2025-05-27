@@ -37,6 +37,7 @@
         <option value="similar">Similar</option>
         <option value="orafy">Orafy</option>
         <option value="intentReply">Intent Reply</option>
+        <option value="evaluate">Evaluate</option>
       </select>
     </div>
 
@@ -82,7 +83,7 @@
     document.addEventListener('DOMContentLoaded', () => {
 
       /* ---------- slash-command helpers ---------- */
-      const COMMANDS = ['/translate', '/refine', '/explain', '/reply', '/reject', '/similar', '/orafy', '/intentReply'];
+      const COMMANDS = ['/translate', '/refine', '/explain', '/reply', '/reject', '/similar', '/orafy', '/intentReply', '/evaluate'];
       function startsWithCmd(txt){
         if (txt.length === 0) return null;
         // Check for both '/' and ' ' as command prefixes
@@ -152,6 +153,25 @@ And make it an oral script that I can read it out. At the bottom of it summarize
 Output only the formatted content, with no additional commentary or explanations outside this format.`;
       const orafyPrompt=`You are an assistant tasked with converting the user's input into an oral speaking style suitable for a speech or presentation. Ensure the text sounds natural, conversational, and engaging as if spoken aloud. Maintain the original meaning, tone, and context, but adjust phrasing, pacing, and emphasis to enhance oral delivery. Output only the converted text, with no additional commentary or explanations.`;
       const intentReplyPrompt=`You are an assistant tasked with generating a response based on the user's specified intent and context. Regardless of the input language, ensure that your response is strictly in English, aligns with the given intent, and relates to the provided context. Output only the reply, with no additional commentary or explanations.`;
+      const evaluatePrompt=`Role – You are an experienced ESL instructor.
+Task – When I paste a piece of student writing, do all of the following in that order:
+
+Identify issues
+  * • Highlight every sentence that contains a grammar, syntax, word-choice, punctuation, or register problem (use 🔶 before each sentence).
+  * • Underline the exact word(s) that are incorrect or awkward.
+
+Explain
+  * • Briefly say what kind of error each one is (e.g., “subject-verb agreement,” “article use,” “word order,” “informal slang in a formal context”).
+  * • Give the rule or guideline the student should remember, in plain language.
+
+Offer corrections
+  * • Rewrite each problem sentence so it is natural, clear, and appropriate for upper-intermediate (B2) level.
+  * • If several rewrites are possible, give one concise alternative plus one more natural/fluent option marked “✨ advanced.”
+
+Mini practice
+  * • Provide 2 short fill-in-the-blank exercises that target the main recurring error type you saw, with answers hidden under a spoiler block (click to reveal).
+
+Tone – Supportive, precise, no judgmental language.`;
       const MAX_PAIRS=10, MAX_MESSAGES=1+MAX_PAIRS*2;
       const conversation=[{role:'system',content:systemPrompt}];
 
@@ -397,7 +417,7 @@ Output only the formatted content, with no additional commentary or explanations
 
         /* slash command detect */
         const cmdInfo=startsWithCmd(rawInput);
-        let forceTranslate=false, forceRefine=false, forceExplain=false, forceReply=false, forceReplyNegative=false, forceSimilar=false, forceOrafy=false, forceIntentReply=false;
+        let forceTranslate=false, forceRefine=false, forceExplain=false, forceReply=false, forceReplyNegative=false, forceSimilar=false, forceOrafy=false, forceIntentReply=false, forceEvaluate=false;
         if(cmdInfo){
           rawInput=cmdInfo.body;
           forceTranslate=cmdInfo.cmd==='/translate';
@@ -408,6 +428,7 @@ Output only the formatted content, with no additional commentary or explanations
           forceSimilar=cmdInfo.cmd==='/similar';
           forceOrafy=cmdInfo.cmd==='/orafy';
           forceIntentReply=cmdInfo.cmd==='/intentReply';
+          forceEvaluate=cmdInfo.cmd==='/evaluate';
           if(!rawInput) return alert('Nothing to send after the command.');
         }
 
@@ -427,6 +448,7 @@ Output only the formatted content, with no additional commentary or explanations
           forceSimilar = selectedAction === 'similar';
           forceOrafy = selectedAction === 'orafy';
           forceIntentReply = selectedAction === 'intentReply';
+          forceEvaluate = selectedAction === 'evaluate';
         }
 
         let messagesForApi;
@@ -472,6 +494,11 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
             {role:'system',content:intentReplyPrompt},
             {role:'user',content:`Intent: ${parts[0]}\nContext: ${parts[1]}`}
           ];
+        } else if(forceEvaluate){
+          messagesForApi=[
+            {role:'system',content:evaluatePrompt},
+            {role:'user',content:rawInput}
+          ];
         } else {
           conversation.push({role:'user',content:rawInput});
           messagesForApi=conversation;
@@ -487,7 +514,7 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           const data=await res.json();
           const reply=data.choices[0].message.content;
 
-          if(!forceTranslate && !forceExplain && !forceReply && !forceReplyNegative && !forceSimilar && !forceOrafy && !forceIntentReply){
+          if(!forceTranslate && !forceExplain && !forceReply && !forceReplyNegative && !forceSimilar && !forceOrafy && !forceIntentReply && !forceEvaluate){
             conversation.push({role:'assistant',content:reply});
             if(conversation.length>MAX_MESSAGES) conversation.splice(1,conversation.length-MAX_MESSAGES);
           }
