@@ -611,6 +611,11 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           setTimeout(showAC);
         }
       });
+      // --- new: also trigger on input (iPhone/Safari) ---
+      userArea.addEventListener('input', () => {
+        // wait a tick so selectionStart/value are updated
+        setTimeout(showAC);
+      });
 
     });
   </script>
