@@ -566,14 +566,15 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
         // 1) figure out what the user has actually typed after the slash/space
         const caretPos = userArea.selectionStart;
         const txt = userArea.value;
-        const lastSlash = txt.lastIndexOf('/', caretPos - 1);
-        const lastSpace = txt.lastIndexOf(' ', caretPos - 1);
-        // only trigger if it’s a slash or exactly one leading space (pos 0)
-        if (lastSlash === -1 && lastSpace !== 0) {
+        // only trigger if it's a slash at the very start or exactly one single space at the very start
+        const isSlashAtStart        = txt.startsWith('/');
+        const isSingleLeadingSpace  = txt.startsWith(' ') && !txt.startsWith('  ');
+        if (!isSlashAtStart && !isSingleLeadingSpace) {
           hideAC();
           return;
         }
-        const start = Math.max(lastSlash, lastSpace);
+        // always treat the prefix‐marker as coming from position 0
+        const start = 0;
         // 1) grab what’s been typed since the last '/' or ' '
         let rawToken = txt.slice(start, caretPos).toLowerCase();
         // 2) drop any leading space so “ tr” → “tr”
