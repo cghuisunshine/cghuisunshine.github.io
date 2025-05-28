@@ -614,8 +614,10 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
       });
       // --- new: also trigger on input (iPhone/Safari) ---
       userArea.addEventListener('input', () => {
-        // wait a tick so selectionStart/value are updated
-        setTimeout(showAC);
+        // only update autocomplete if it's already open (prevents every space on iPhone)
+        if (acBox.style.display === 'block') {
+          setTimeout(showAC);
+        }
       });
 
     });
