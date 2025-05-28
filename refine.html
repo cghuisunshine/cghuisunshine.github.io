@@ -569,7 +569,14 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
         const lastSlash = txt.lastIndexOf('/', caretPos - 1);
         const lastSpace = txt.lastIndexOf(' ', caretPos - 1);
         const start = Math.max(lastSlash, lastSpace);
-        const prefix = txt.slice(start, caretPos).toLowerCase();
+        // 1) grab what’s been typed since the last '/' or ' '
+        let rawToken = txt.slice(start, caretPos).toLowerCase();
+        // 2) drop any leading space so “ tr” → “tr”
+        let prefix = rawToken.trimStart();
+        // 3) if they typed a space-first, make it look like a slash-command
+        if (!prefix.startsWith('/')) {
+          prefix = '/' + prefix;
+        }
 
         // 2) filter COMMANDS by that prefix
         const filtered = COMMANDS.filter(cmd => cmd.toLowerCase().startsWith(prefix));
