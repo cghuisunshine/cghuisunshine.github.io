@@ -563,7 +563,23 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
         const isMobile = window.innerWidth <= 600; // Simple mobile detection based on viewport width
         
         const currentAction = actionSelect.value;
-        acBox.innerHTML=COMMANDS.map(c=>`<div data-cmd="${c}" style="padding:4px 8px;cursor:pointer">${c}${c === '/' + currentAction ? ' *' : ''}</div>`).join('');
+        // 1) figure out what the user has actually typed after the slash/space
+        const caretPos = userArea.selectionStart;
+        const txt = userArea.value;
+        const lastSlash = txt.lastIndexOf('/', caretPos - 1);
+        const lastSpace = txt.lastIndexOf(' ', caretPos - 1);
+        const start = Math.max(lastSlash, lastSpace);
+        const prefix = txt.slice(start, caretPos).toLowerCase();
+
+        // 2) filter COMMANDS by that prefix
+        const filtered = COMMANDS.filter(cmd => cmd.toLowerCase().startsWith(prefix));
+        if (!filtered.length) {
+          hideAC();
+          return;
+        }
+
+        // 3) render only the filtered list
+        acBox.innerHTML = filtered.map(c => `<div data-cmd="${c}" style="padding:4px 8px;cursor:pointer">${c}${c === '/' + currentAction ? ' *' : ''}</div>`).join('');
         acBox.style.left = (left + 6) + 'px';
         if (isMobile) {
           // On mobile, position it just above the textarea considering the keyboard might be up
@@ -579,7 +595,8 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
         if ((e.key === '/' || e.key === ' ') && userArea.selectionStart === 0) {
           setTimeout(showAC); // show menu after slash or space
         } else if (acBox.style.display === 'block') {
-          hideAC(); // hide on any key press if autocomplete is visible
+          // instead of hiding, re-filter the list as you keep typing
+          setTimeout(showAC);
         }
       });
 
