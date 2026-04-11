@@ -59,13 +59,17 @@
     <div class="button-container">
         <button onclick="obfuscate()">Obfuscate</button>
         <button onclick="restore()">Restore</button>
-        <button onclick="shareLink()">Share</button>
+        <button onclick="shareLink()">Share Link</button>
+        <button onclick="shareImageOnly()">Share Image</button>
         <button onclick="clearInput()">Clear</button>
     </div>
     
     <div id="imageContainer"></div>
     
     <script>
+
+        let lastGeneratedCanvas = null;
+        let lastGeneratedBlob = null;
 
         function shareLink() {
             let text = document.getElementById('inputText').value;
@@ -89,6 +93,44 @@
             } else {
                 // If the Web Share API is not available, display the URL for manual sharing
                 alert(`Copy this link to share: ${url}`);
+            }
+        }
+
+        async function shareImageOnly() {
+            if (!lastGeneratedCanvas) {
+                alert('Please generate an image first.');
+                return;
+            }
+
+            const blob = lastGeneratedBlob || await new Promise(resolve =>
+                lastGeneratedCanvas.toBlob(resolve, 'image/png')
+            );
+
+            if (!blob) {
+                alert('Could not create image blob.');
+                return;
+            }
+
+            const file = new File([blob], 'obfuscate.png', { type: 'image/png' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Obfuscated Image'
+                    });
+                    console.log('Image shared successfully');
+                } catch (error) {
+                    console.error(error);
+                }
+            } else {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'obfuscate.png';
+                link.click();
+                URL.revokeObjectURL(url);
+                alert('This browser does not support direct image sharing, so the image was downloaded instead.');
             }
         }
 
@@ -188,7 +230,7 @@
 }
 
 
-        function obfuscate() {
+        async function obfuscate() {
             const inputText = document.getElementById('inputText').value;
             const obfuscationCount = parseInt(document.getElementById('obfuscationCount').value);
             const insertCount = obfuscationCount;
@@ -207,11 +249,11 @@
 
             navigator.clipboard.writeText(obfuscatedText);
 
-            generateGrid(obfuscatedText);
+            await generateGrid(obfuscatedText);
 
          }
 
-         function generateGrid(text) {
+         async function generateGrid(text) {
 
             if (!text) return; 
             
@@ -255,6 +297,9 @@
                 }
             }
         
+            lastGeneratedCanvas = canvas;
+            lastGeneratedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
             // 显示图像
             const imageSrc = canvas.toDataURL("image/png");
             const imageElement = document.createElement('img');
@@ -283,6 +328,8 @@
             navigator.clipboard.writeText(restoredText);
 
             document.getElementById('imageContainer').innerHTML = '';
+            lastGeneratedCanvas = null;
+            lastGeneratedBlob = null;
 
         }
 
@@ -290,6 +337,8 @@
             document.getElementById('inputText').value = '';
             // document.getElementById('resultText').value = '';
             document.getElementById('imageContainer').innerHTML = '';
+            lastGeneratedCanvas = null;
+            lastGeneratedBlob = null;
             document.getElementById('inputText').focus(); 
 
         }
