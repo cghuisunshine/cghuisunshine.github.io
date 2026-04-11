@@ -116,8 +116,7 @@
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
                     await navigator.share({
-                        files: [file],
-                        title: 'Obfuscated Image'
+                        files: [file]
                     });
                     console.log('Image shared successfully');
                 } catch (error) {
