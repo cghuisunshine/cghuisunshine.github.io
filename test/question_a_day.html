@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日一题</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC",
+        "Microsoft YaHei", Arial, sans-serif;
+      background: #ffffff;
+      color: #111827;
+      overflow: hidden;
+    }
+
+    .top {
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 14px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #ffffff;
+      position: relative;
+      z-index: 20;
+    }
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .menu-btn {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 12px;
+      background: #f3f4f6;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .menu-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .hamburger {
+      width: 20px;
+      height: 14px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 2px;
+      border-radius: 999px;
+      background: #111827;
+    }
+
+    .title-wrap {
+      min-width: 0;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 850;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .info {
+      color: #667085;
+      font-size: 13px;
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 58vw;
+    }
+
+    .today-tag {
+      color: #2563eb;
+      font-weight: 750;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .question-quick-search {
+      width: min(360px, 38vw);
+      min-width: 190px;
+      height: 36px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #111827;
+      font-size: 14px;
+      padding: 0 34px 0 10px;
+      cursor: text;
+    }
+
+    .question-quick-search:focus,
+    .question-search:focus {
+      outline: 2px solid #bfdbfe;
+      outline-offset: 1px;
+      border-color: #60a5fa;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: calc(100vh - 54px);
+      border: 0;
+      background: #ffffff;
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.42);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .drawer {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: min(360px, 88vw);
+      background: #ffffff;
+      z-index: 40;
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+      box-shadow: 16px 0 36px rgba(15, 23, 42, 0.18);
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.menu-open .drawer-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    body.menu-open .drawer {
+      transform: translateX(0);
+    }
+
+    .drawer-head {
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 14px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .drawer-title {
+      font-size: 18px;
+      font-weight: 850;
+    }
+
+    .close-btn {
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 999px;
+      background: #f3f4f6;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .question-list {
+      overflow: auto;
+      padding: 10px;
+    }
+
+    .drawer-tools {
+      padding: 10px 10px 0;
+    }
+
+    .question-search {
+      width: 100%;
+      height: 40px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #111827;
+      font-size: 15px;
+      padding: 0 11px;
+    }
+
+    .question-empty {
+      display: none;
+      padding: 14px 12px;
+      color: #667085;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .question-empty.show {
+      display: block;
+    }
+
+    .question-btn {
+      width: 100%;
+      border: 1px solid transparent;
+      background: #ffffff;
+      text-align: left;
+      padding: 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: grid;
+      gap: 4px;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+
+    .question-btn:hover {
+      background: #f8fafc;
+      border-color: #e5e7eb;
+    }
+
+    .question-btn.active {
+      background: #eff6ff;
+      border-color: #93c5fd;
+    }
+
+    .question-btn[hidden] {
+      display: none !important;
+    }
+
+    .question-num {
+      color: #2563eb;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .question-name {
+      font-size: 16px;
+      font-weight: 780;
+    }
+
+    .question-meta {
+      color: #667085;
+      font-size: 12px;
+    }
+
+    .fallback {
+      display: none;
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 25;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid #fed7aa;
+      background: #fff7ed;
+      color: #9a3412;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .fallback.show {
+      display: block;
+    }
+
+    .fallback a {
+      color: #1d4ed8;
+      font-weight: 800;
+    }
+
+    @media (max-width: 600px) {
+      .top {
+        height: 50px;
+        padding: 0 8px;
+      }
+
+      .menu-btn {
+        width: 40px;
+        height: 40px;
+      }
+
+      .title {
+        font-size: 16px;
+      }
+
+      .info {
+        font-size: 12px;
+        max-width: 62vw;
+      }
+
+      .today-tag {
+        display: none;
+      }
+
+      .question-quick-search {
+        width: 44vw;
+        min-width: 128px;
+        height: 38px;
+        font-size: 13px;
+      }
+
+      iframe {
+        height: calc(100vh - 50px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="top">
+    <div class="left">
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open question menu" aria-expanded="false">
+        <span class="hamburger" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </button>
+
+      <div class="title-wrap">
+        <div class="title">每日一题</div>
+        <div class="info" id="info">Loading...</div>
+      </div>
+    </div>
+
+    <input class="question-quick-search" id="questionQuickSearch" type="search" placeholder="搜索题目" autocomplete="off" aria-label="搜索题目" />
+    <div class="today-tag" id="todayTag">Today</div>
+  </header>
+
+  <aside class="drawer" id="drawer" aria-label="Question menu">
+    <div class="drawer-head">
+      <div class="drawer-title">选择题目</div>
+      <button class="close-btn" id="closeBtn" type="button" aria-label="Close menu">×</button>
+    </div>
+    <div class="drawer-tools">
+      <input class="question-search" id="questionSearch" type="search" placeholder="搜索标题或内容关键词" autocomplete="off" />
+    </div>
+    <div class="question-empty" id="questionEmpty">没有找到匹配的题目。</div>
+    <nav class="question-list" id="questionList"></nav>
+  </aside>
+
+  <div class="drawer-backdrop" id="backdrop"></div>
+
+  <iframe id="questionFrame" title="今日题目"></iframe>
+
+  <div class="fallback" id="fallback">
+    如果题目没有显示，请点击
+    <a id="fallbackLink" href="#" target="_blank" rel="noopener">这里打开题目</a>。
+  </div>
+
+  <script>
+    const QUESTIONS = [
+    {
+        "title": "求阴影部分面积",
+        "url": "https://cghuisunshine.github.io/test/shaded_area_clean_toggle_answers.html"
+    },
+    {
+        "title": "数字求值",
+        "url": "https://cghuisunshine.github.io/test/shape_digit_puzzle_bilingual_two_methods.html"
+    },
+    {
+        "title": "偶数填空",
+        "url": "https://cghuisunshine.github.io/test/consecutive_even_numbers_bilingual_show_hide.html"
+    },
+    {
+        "title": "求值",
+        "url": "https://cghuisunshine.github.io/test/circle_equation_bilingual_with_visual_method2.html"
+    },
+    {
+        "title": "简便运算",
+        "url": "https://cghuisunshine.github.io/test/mental_math_shortcut_bilingual_three_methods.html"
+    },
+    {
+        "title": "求值",
+        "url": "https://cghuisunshine.github.io/test/find_A_B_bilingual_show_hide.html"
+    },
+    {
+        "title": "解方程 6^x = x^18",
+        "url": "https://cghuisunshine.github.io/Math_middle/solve_equation_6x_equals_x18.html"
+    },
+    {
+        "title": "解方程 x^x = 3^(x+243)",
+        "url": "https://cghuisunshine.github.io/Math_middle/solve_equation_x_power_x_equals_3_power_x_plus_243.html"
+    },
+    {
+        "title": "解方程 (11x-6)/(6x-11)=x^4",
+        "url": "https://cghuisunshine.github.io/Math_middle/solve_rational_equation_11x_minus_6_over_6x_minus_11_equals_x4_bilingual.html"
+    },
+    {
+        "title": "已知 x⁵+x+1=0，求 x³-x²",
+        "url": "https://cghuisunshine.github.io/Math_middle/solve_x5_plus_x_plus_1_find_x3_minus_x2_bilingual.html"
+    },
+    {
+        "title": "已知 x²+y²=5，求分式和的最小值",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_fraction_sum_given_x2_y2_5_bilingual.html"
+    },
+    {
+        "title": "髋关节骨质增生疼痛时如何安全锻炼",
+        "url": "https://cghuisunshine.github.io/test/hip_osteophyte_exercise_plan.html"
+    },
+    {
+        "title": "方块代表几",
+        "url": "https://cghuisunshine.github.io/test/fraction_box_bilingual_with_visual_method2.html"
+    },
+    {
+        "title": "幻方",
+        "url": "https://cghuisunshine.github.io/test/magic_square_bilingual_three_methods.html"
+    },
+    {
+        "title": "数三角形",
+        "url": "https://cghuisunshine.github.io/test/count_triangles_bilingual_show_hide.html"
+    },
+    {
+        "title": "分数求和",
+        "url": "https://cghuisunshine.github.io/test/fraction_sum_bilingual_show_hide.html"
+    },
+    {
+        "title": "求阴影部分面积",
+        "url": "https://cghuisunshine.github.io/test/shaded_semicircles_method1_only.html"
+    },
+    {
+        "title": "多个5求和",
+        "url": "https://cghuisunshine.github.io/test/repeated_5_sum_9_bilingual_three_methods_FIXED.html"
+    },
+    {
+        "title": "求面积",
+        "url": "https://cghuisunshine.github.io/test/overlapping_triangles_shaded_area_speak.html"
+    },
+    {
+        "title": "平方与根号运算",
+        "url": "https://cghuisunshine.github.io/test/square_sum_root_2025_2026_solution2_one_image.html"
+    },
+    {
+        "title": "幂的比较大小",
+        "url": "https://cghuisunshine.github.io/test/compare_1_005_power_200_three_solutions.html"
+    },
+    {
+        "title": "两数平方和最小值",
+        "url": "https://cghuisunshine.github.io/Math_middle/minimum_sum_pair_squares_bilingual_show_hide.html"
+    },
+    {
+        "title": "根式求值",
+        "url": "https://cghuisunshine.github.io/Math_middle/radical_expression_circle_constraint_bilingual_show_hide.html"
+    },
+    {
+        "title": "平方差 1573",
+        "url": "https://cghuisunshine.github.io/Math_middle/difference_of_squares_1573_one_solution_bilingual_show_hide.html"
+    },
+    {
+        "title": "果汁半杯谜题",
+        "url": "https://cghuisunshine.github.io/Math_middle/juice_water_half_cup_puzzle_bilingual_show_hide.html"
+    },
+    {
+        "title": "指数对数倒数求和",
+        "url": "https://cghuisunshine.github.io/Math_middle/exponential_log_reciprocal_sum_two_methods.html"
+    },
+    {
+        "title": "多项式 x⁵+x+1 求值",
+        "url": "https://cghuisunshine.github.io/Math_middle/polynomial_x5_x_plus_1_value_factor_steps.html"
+    },
+    {
+        "title": "求 2a+3b 最大值",
+        "url": "https://cghuisunshine.github.io/Math_middle/max_2a_3b_given_sum_squares_three_methods_clean.html"
+    },
+    {
+        "title": "根式方程求 x²+y²",
+        "url": "https://cghuisunshine.github.io/Math_middle/radical_equation_find_x2_y2_29_two_methods.html"
+    },
+    {
+        "title": "比较 50⁵⁰ 与 49⁵¹",
+        "url": "https://cghuisunshine.github.io/Math_middle/compare_50_power_50_49_power_51_three_methods.html"
+    },
+    {
+        "title": "最小周长角反射",
+        "url": "https://cghuisunshine.github.io/Math_middle/minimum_perimeter_angle_reflection_70_corrected_diagram.html"
+    },
+    {
+        "title": "比较 25²⁴ 与 24²⁵",
+        "url": "https://cghuisunshine.github.io/Math_middle/compare_25_power_24_24_power_25_three_methods_mathjax.html"
+    },
+    {
+        "title": "绳子绕树问题",
+        "url": "https://cghuisunshine.github.io/Math_middle/rope_around_tree_problem_bilingual_show_hide.html"
+    },
+    {
+        "title": "根式和最小值",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_radical_sum_m_n_12_accurate_geometry.html"
+    },
+    {
+        "title": "苹果和梨数量问题",
+        "url": "https://cghuisunshine.github.io/Math_middle/apples_pears_quantity_problem_bilingual_show_hide.html"
+    },
+    {
+        "title": "晓红妈妈年龄问题",
+        "url": "https://cghuisunshine.github.io/Math_middle/xiaohong_mom_age_problem_bilingual_show_hide.html"
+    },
+    {
+        "title": "男生女生剩余分数问题",
+        "url": "https://cghuisunshine.github.io/Math_middle/boys_girls_left_fraction_problem_bilingual_show_hide_with_shapes.html"
+    },
+    {
+        "title": "指数对数乘积 a−1 b−1",
+        "url": "https://cghuisunshine.github.io/Math_middle/exponent_log_product_a_minus_1_b_minus_1.html"
+    },
+    {
+        "title": "根号 m²+59 整数 m 求值",
+        "url": "https://cghuisunshine.github.io/Math_middle/sqrt_m2_plus_59_integer_find_m.html"
+    },
+    {
+        "title": "根式最小值表达式",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_value_radical_expression_sqrt2_over_2_x.html"
+    },
+    {
+        "title": "工程剩余75天分数问题",
+        "url": "https://cghuisunshine.github.io/Math_middle/work_project_fraction_remaining_75_days.html"
+    },
+    {
+        "title": "半圆中 AP + 1/2 BP 的最大值",
+        "url": "https://cghuisunshine.github.io/Math_middle/semicircle_max_ap_half_bp.html"
+    },
+    {
+        "title": "等边三角形内 PA+PB+PC 的最小值",
+        "url": "https://cghuisunshine.github.io/Math_middle/equilateral_triangle_min_pa_pb_pc.html"
+    },
+    {
+        "title": "四分之一圆中 CD+√3OD 的最大值",
+        "url": "https://cghuisunshine.github.io/Math_middle/quarter_circle_max_cd_sqrt3_od.html"
+    },
+    {
+        "title": "x²+y²=4 时 4x+3y 的最大值",
+        "url": "https://cghuisunshine.github.io/Math_middle/max_4x_3y_given_x2_y2_4.html"
+    },
+    {
+        "title": "向量法求最大值",
+        "url": "https://cghuisunshine.github.io/Math_middle/vector_maximum.html"
+    },
+    {
+        "title": "随机截木棍成三段，能围成三角形的概率",
+        "url": "https://cghuisunshine.github.io/Math_middle/random_cut_stick_triangle_probability_clean.html"
+    },
+    {
+        "title": "柯西不等式证明",
+        "url": "https://cghuisunshine.github.io/Math_middle/cauchy_inequality_proof_bilingual_with_geometric_method.html"
+    },
+    {
+        "title": "图解闵可夫斯基不等式",
+        "url": "https://cghuisunshine.github.io/Math_middle/minkowski_inequality_visual_proof_short_question_with_second_method.html"
+    },
+    {
+        "title": "数形结合：求根式差的最大值",
+        "url": "https://cghuisunshine.github.io/Math_middle/max_radical_difference_geometry_with_general_P.html"
+    },
+    {
+        "title": "幂的周期问题",
+        "url": "https://cghuisunshine.github.io/Math_middle/m_power_2024_minus_2023_bilingual.html"
+    },
+    {
+        "title": "根式条件求值",
+        "url": "https://cghuisunshine.github.io/Math_middle/radical_constraint_x2_y2_16.html"
+    },
+    {
+        "title": "Triangle Area 12, Base 6: Minimum of AB/AC",
+        "url": "https://cghuisunshine.github.io/Math_middle/triangle_area_12_base_6_min_ab_over_ac_with_method2.html"
+    },
+    {
+        "title": "Minimum of PA+2PB in the Coordinate Plane",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_pa_plus_2pb_coordinate.html"
+    },
+    {
+        "title": "Minimum of x+√(x²+3y²) with x+y=2",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_x_plus_radical_x2_3y2_with_method2.html"
+    },
+    {
+        "title": "Minimum of x²+√(x⁴-3x²+2x+5)",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_x2_plus_radical_quartic_with_method2_self_contained.html"
+    },
+    {
+        "title": "Compare Powers: Two Independent Questions",
+        "url": "https://cghuisunshine.github.io/Math_middle/compare_powers_two_independent_questions.html"
+    },
+    {
+        "title": "Solve 33^x - 32^x = 65",
+        "url": "https://cghuisunshine.github.io/Math_middle/solve_equation_33x_minus_32x_equals_65.html"
+    },
+    {
+        "title": "Solve x^32 = 2^x",
+        "url": "https://cghuisunshine.github.io/Math_middle/solve_equation_x32_equals_2x_fixed.html"
+    },
+    {
+        "title": "正整数 m²+n²=4114",
+        "url": "https://cghuisunshine.github.io/Math_middle/positive_integer_m_n_square_sum_4114.html"
+    },
+    {
+        "title": "数形结合：根式和最小值",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_sum_three_radicals_geometry.html"
+    },
+    {
+        "title": "根式条件求2x+y最小值",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_2x_plus_y_radicals_with_geometry.html"
+    },
+    {
+        "title": "旋转法求EF最大值（更新版）",
+        "url": "https://cghuisunshine.github.io/Math_middle/max_EF_rotation_method_with_method2_link.html"
+    },
+    {
+        "title": "比较大小：√74与√61+1",
+        "url": "https://cghuisunshine.github.io/Math_middle/sqrt_compare_bilingual.html"
+    },
+    {
+        "title": "根式求 a+1/a",
+        "url": "https://cghuisunshine.github.io/Math_middle/radical_a_plus_inverse_bilingual.html"
+    },
+    {
+        "title": "解方程 12^x-11^x=23",
+        "url": "https://cghuisunshine.github.io/Math_middle/solve_12x_minus_11x_equals_23_bilingual.html"
+    },
+    {
+        "title": "分式求值：x²-y²=2xy",
+        "url": "https://cghuisunshine.github.io/Math_middle/solve_fraction_from_x2_minus_y2_equals_2xy_bilingual.html"
+    }
+,
+    {
+        "title": "已知 x+y=2，求 x+√(x²+3y²) 的最小值",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_x_plus_sqrt_x2_3y2_given_sum_2_bilingual.html"
+    }
+,
+    {
+        "title": "已知 a²+b²=c²，求 c/(a+b) 的最小值",
+        "url": "https://cghuisunshine.github.io/Math_middle/min_c_over_a_plus_b_pythagorean_bilingual.html"
+    },
+    {
+        "title": "已知 a²+b²=1，求 (a+1)(b-1) 的取值范围",
+        "url": "https://cghuisunshine.github.io/Math_middle/range_a_plus_1_b_minus_1_unit_circle_bilingual_mathjax_ok.html"
+    },
+    {
+        "title": "分式和最大值",
+        "url": "https://cghuisunshine.github.io/Math_middle/max_fraction_expression_xy_positive_bilingual_v2.html"
+    },
+    {
+        "title": "已知根式和为 8，求 a+3 的值",
+        "url": "https://cghuisunshine.github.io/Math_middle/solve_radical_sum_a2_plus_5_a2_plus_21_bilingual.html"
+    },
+    {
+        "title": "分式最小值——三种解法",
+        "url": "https://cghuisunshine.github.io/Math_middle/fraction_min_value_three_methods.html"
+    },
+    {
+        "title": "分式最小值三种解法",
+        "url": "https://cghuisunshine.github.io/Math_middle/fraction_minimum_three_methods_bilingual_style.html"
+    },
+    {
+        "title": "根式分式最小值 / Radical Fraction Minimum (Cauchy)",
+        "url": "https://cghuisunshine.github.io/Math_middle/radical_fraction_minimum_bilingual_cauchy.html"
+    },
+    {
+        "title": "已知 a+b+c=0，求分式和",
+        "url": "https://cghuisunshine.github.io/Math_middle/abc_zero_fraction_sum_bilingual_with_two_more_methods.html"
+    }
+
+];
+
+    // Start date of the 75-question cycle: June 13, 2026.al fraction minimum link to question list and content index)
+    const BASE_DATE = new Date(2026, 5, 13);
+    const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+    const body = document.body;
+    const menuBtn = document.getElementById("menuBtn");
+    const closeBtn = document.getElementById("closeBtn");
+    const backdrop = document.getElementById("backdrop");
+    const questionList = document.getElementById("questionList");
+    const questionQuickSearch = document.getElementById("questionQuickSearch");
+    const questionSearch = document.getElementById("questionSearch");
+    const questionEmpty = document.getElementById("questionEmpty");
+    const frame = document.getElementById("questionFrame");
+    const info = document.getElementById("info");
+    const todayTag = document.getElementById("todayTag");
+    const fallback = document.getElementById("fallback");
+    const fallbackLink = document.getElementById("fallbackLink");
+
+    let currentIndex = 0;
+    let loadTimer = null;
+
+    function startOfLocalDay(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function normalizeIndex(index) {
+      return ((index % QUESTIONS.length) + QUESTIONS.length) % QUESTIONS.length;
+    }
+
+    function getTodayQuestionIndex() {
+      const today = startOfLocalDay(new Date());
+      const days = Math.floor((today - BASE_DATE) / MS_PER_DAY);
+      return normalizeIndex(days);
+    }
+
+    function formatDate(date) {
+      return new Intl.DateTimeFormat(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        weekday: "short"
+      }).format(date);
+    }
+
+    function getHashIndex() {
+      const match = location.hash.match(/q=(\d+)/);
+      if (!match) return null;
+      const number = Number(match[1]);
+      if (!Number.isInteger(number) || number < 1 || number > QUESTIONS.length) return null;
+      return number - 1;
+    }
+
+    function openMenu() {
+      body.classList.add("menu-open");
+      menuBtn.setAttribute("aria-expanded", "true");
+    }
+
+    function closeMenu() {
+      body.classList.remove("menu-open");
+      menuBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function showQuestion(index, saveHash = true) {
+      currentIndex = normalizeIndex(index);
+      const question = QUESTIONS[currentIndex];
+      const todayIndex = getTodayQuestionIndex();
+      const isToday = currentIndex === todayIndex;
+
+      document.title = "每日一题 - " + question.title;
+      info.textContent = formatDate(new Date()) + " · 第 " + (currentIndex + 1) + " 题 · " + question.title;
+      todayTag.textContent = isToday ? "今日题目" : "已选择题目";
+      questionQuickSearch.value = "";
+      questionSearch.value = "";
+      fallbackLink.href = question.url;
+
+      Array.from(document.querySelectorAll(".question-btn")).forEach((btn, i) => {
+        btn.classList.toggle("active", i === currentIndex);
+      });
+      filterMenu();
+
+      clearTimeout(loadTimer);
+      fallback.classList.remove("show");
+      loadTimer = setTimeout(() => {
+        fallback.classList.add("show");
+      }, 2500);
+
+      frame.onload = function () {
+        clearTimeout(loadTimer);
+        fallback.classList.remove("show");
+      };
+
+      frame.src = question.url;
+
+      if (saveHash) {
+        history.replaceState(null, "", "#q=" + (currentIndex + 1));
+      }
+
+      closeMenu();
+    }
+
+    function buildMenu() {
+      const todayIndex = getTodayQuestionIndex();
+
+      questionList.innerHTML = "";
+      QUESTIONS.forEach((question, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "question-btn";
+        button.dataset.search = getQuestionSearchText(question, index);
+
+        const number = document.createElement("div");
+        number.className = "question-num";
+        number.textContent = `第 ${index + 1} 题${index === todayIndex ? " · 今日" : ""}`;
+
+        const name = document.createElement("div");
+        name.className = "question-name";
+        name.textContent = question.title;
+
+        const meta = document.createElement("div");
+        meta.className = "question-meta";
+        meta.textContent = index === todayIndex ? "今天自动显示" : "点击切换题目";
+
+        button.append(number, name, meta);
+        button.addEventListener("click", () => showQuestion(index, true));
+        questionList.appendChild(button);
+      });
+    }
+
+    function getQuestionSearchText(question, index) {
+      const url = new URL(question.url);
+      const pathWords = url.pathname
+        .replace(/\.html$/i, "")
+        .split(/[\/_\-]+/)
+        .filter(Boolean)
+        .join(" ");
+      return normalizeSearchText(`${index + 1} ${question.title} ${pathWords} ${question.keywords || ""}`);
+    }
+
+    function normalizeSearchText(text) {
+      return text
+        .toLowerCase()
+        .replace(/[²₂]/g, "2")
+        .replace(/[³₃]/g, "3")
+        .replace(/[⁴₄]/g, "4")
+        .replace(/[⁵₅]/g, "5")
+        .replace(/[⁶₆]/g, "6")
+        .replace(/[⁷₇]/g, "7")
+        .replace(/[⁸₈]/g, "8")
+        .replace(/[⁹₉]/g, "9")
+        .replace(/[⁰₀]/g, "0")
+        .replace(/[¹₁]/g, "1")
+        .replace(/[√]/g, " sqrt ")
+        .replace(/[−–—]/g, "-")
+        .replace(/[^a-z0-9\u4e00-\u9fff]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function filterMenu() {
+      const query = normalizeSearchText(questionSearch.value);
+      const terms = query.split(" ").filter(Boolean);
+      let matchCount = 0;
+
+      Array.from(document.querySelectorAll(".question-btn")).forEach((button) => {
+        const isMatch = terms.length === 0 || terms.every((term) => button.dataset.search.includes(term));
+        button.hidden = !isMatch;
+        if (isMatch) matchCount += 1;
+      });
+
+      questionEmpty.classList.toggle("show", matchCount === 0);
+    }
+
+    function applySearch(value, openDrawer = false) {
+      questionQuickSearch.value = value;
+      questionSearch.value = value;
+      filterMenu();
+      if (openDrawer) openMenu();
+    }
+
+    menuBtn.addEventListener("click", openMenu);
+    closeBtn.addEventListener("click", closeMenu);
+    backdrop.addEventListener("click", closeMenu);
+    questionQuickSearch.addEventListener("focus", openMenu);
+    questionQuickSearch.addEventListener("input", () => applySearch(questionQuickSearch.value, true));
+    questionSearch.addEventListener("input", () => applySearch(questionSearch.value, false));
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeMenu();
+    });
+
+    window.addEventListener("hashchange", () => {
+      const index = getHashIndex();
+      if (index !== null) showQuestion(index, false);
+    });
+
+    buildMenu();
+    showQuestion(getHashIndex() ?? getTodayQuestionIndex(), false);
+  </script>
+</body>
+</html>
