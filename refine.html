@@ -278,9 +278,18 @@ Tone – Supportive, precise, no judgmental language.`;
         });
         return div.innerHTML;
       }
-      function appendAndScroll(html){
-        chatMessages.innerHTML+=html;
-        chatMessages.scrollTop=chatMessages.scrollHeight;
+      function appendAndScroll(html,showFromStart=false){
+        chatMessages.insertAdjacentHTML('beforeend',html);
+        const newestMessage=chatMessages.lastElementChild;
+        requestAnimationFrame(()=>{
+          if(showFromStart&&newestMessage){
+            const messageTop=newestMessage.getBoundingClientRect().top;
+            const chatTop=chatMessages.getBoundingClientRect().top;
+            chatMessages.scrollTop+=messageTop-chatTop-10;
+          }else{
+            chatMessages.scrollTop=chatMessages.scrollHeight;
+          }
+        });
       }
 
       /* ---------- clear chat ---------- */
@@ -335,18 +344,21 @@ Tone – Supportive, precise, no judgmental language.`;
         }
       });
 
-      /* ---------- Ctrl/Cmd+Enter or Empty Line Enter ---------- */
+      /* ---------- Ctrl/Cmd+Enter or two consecutive Returns ---------- */
       userArea.addEventListener('keydown', e => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
           e.preventDefault();
           sendBtn.click();
-        } else if (e.key === 'Enter' && !e.isComposing) {
-          const lines = userArea.value.split('\n');
-          const lastLine = lines[lines.length - 1].trim();
-          if (lastLine === '' && lines.length > 1 && lines[lines.length - 2].trim() !== '') {
-            e.preventDefault();
-            sendBtn.click();
-          }
+        } else if (
+          e.key === 'Enter' &&
+          !e.shiftKey &&
+          !e.isComposing &&
+          userArea.selectionStart === userArea.selectionEnd &&
+          userArea.selectionStart > 0 &&
+          userArea.value[userArea.selectionStart - 1] === '\n'
+        ) {
+          e.preventDefault();
+          sendBtn.click();
         }
       });
 
@@ -465,6 +477,8 @@ Tone – Supportive, precise, no judgmental language.`;
         }
 
         userArea.value='';
+        userArea.focus();
+        userArea.setSelectionRange(0,0);
         // Display the message without the command
         const displayInput = cmdInfo ? cmdInfo.body : rawInput;
         appendAndScroll(`<div class="message user">You: ${displayInput}</div>`);
@@ -565,9 +579,9 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
             if(conversation.length>MAX_MESSAGES) conversation.splice(1,conversation.length-MAX_MESSAGES);
           }
 
-          appendAndScroll(`<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`);
+          appendAndScroll(`<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`,true);
         }catch(e){
-          appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`);
+          appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`,true);
         }
       });
 
