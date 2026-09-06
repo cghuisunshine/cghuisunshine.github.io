@@ -317,6 +317,7 @@ Tone – Supportive, precise, no judgmental language.`;
         conversation.splice(1);
         chatMessages.scrollTop=0;
         userArea.value = ''; // Clear the input field
+        previousUserAreaValue='';
       });
 
       /* ---------- toast ---------- */
@@ -410,55 +411,80 @@ Tone – Supportive, precise, no judgmental language.`;
       /* ---------- Ctrl/Cmd+Enter or two consecutive Returns ---------- */
       let preserveNextLineBreak=false;
       let ignoreNextDoubleReturnCheck=false;
+      let returnSequenceArmed=false;
+      let lineBreakHandledBeforeInput=false;
+      let previousUserAreaValue=userArea.value;
+
+      function resetReturnSequence(){
+        returnSequenceArmed=false;
+        lineBreakHandledBeforeInput=false;
+      }
+      function sendFromDoubleReturn(e){
+        if(e&&e.cancelable) e.preventDefault();
+        resetReturnSequence();
+        sendBtn.click();
+      }
+      function isLineBreakInput(e){
+        return e.inputType==='insertLineBreak'||
+               e.inputType==='insertParagraph'||
+               e.data==='\n'||e.data==='\r'||e.data==='\r\n';
+      }
+      function insertedSingleLineBreak(before,after){
+        if(after.length!==before.length+1) return false;
+        let index=0;
+        while(index<before.length&&before[index]===after[index]) index++;
+        return after[index]==='\n'&&after.slice(index+1)===before.slice(index);
+      }
+
       userArea.addEventListener('keydown', e => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
           e.preventDefault();
+          resetReturnSequence();
           sendBtn.click();
         } else if(e.key==='Enter'&&e.shiftKey){
           preserveNextLineBreak=true;
-        } else if (
-          e.key === 'Enter' &&
-          !e.shiftKey &&
-          !e.isComposing &&
-          userArea.selectionStart === userArea.selectionEnd &&
-          userArea.selectionStart > 0 &&
-          userArea.value[userArea.selectionStart - 1] === '\n'
-        ) {
-          e.preventDefault();
-          sendBtn.click();
+          resetReturnSequence();
         }
       });
 
-      function isLineBreakInput(e){
-        return e.inputType==='insertLineBreak'||e.inputType==='insertParagraph';
-      }
       userArea.addEventListener('beforeinput',e=>{
-        if(!isLineBreakInput(e)||preserveNextLineBreak||e.isComposing) return;
-        const caret=userArea.selectionStart;
-        if(
-          caret===userArea.selectionEnd&&
-          caret>0&&
-          userArea.value[caret-1]==='\n'
-        ){
-          e.preventDefault();
-          sendBtn.click();
+        if(e.isComposing) return;
+        if(!isLineBreakInput(e)){
+          lineBreakHandledBeforeInput=false;
+          return;
         }
+        if(preserveNextLineBreak) return;
+        if(returnSequenceArmed) return sendFromDoubleReturn(e);
+        returnSequenceArmed=true;
+        lineBreakHandledBeforeInput=true;
       });
       userArea.addEventListener('input',e=>{
+        const currentValue=userArea.value;
+        const insertedLineBreak=isLineBreakInput(e)||
+          insertedSingleLineBreak(previousUserAreaValue,currentValue)||
+          (currentValue.length>previousUserAreaValue.length&&currentValue.endsWith('\n'));
+        previousUserAreaValue=currentValue;
+
         if(preserveNextLineBreak){
           preserveNextLineBreak=false;
+          resetReturnSequence();
           return;
         }
         if(e.isComposing||ignoreNextDoubleReturnCheck||e.inputType==='insertFromPaste'){
           ignoreNextDoubleReturnCheck=false;
+          resetReturnSequence();
           return;
         }
-        const caret=userArea.selectionStart;
-        if(
-          caret===userArea.selectionEnd&&
-          caret>1&&
-          userArea.value.slice(caret-2,caret)==='\n\n'
-        ) sendBtn.click();
+        if(lineBreakHandledBeforeInput){
+          lineBreakHandledBeforeInput=false;
+          return;
+        }
+        if(!insertedLineBreak){
+          resetReturnSequence();
+          return;
+        }
+        if(returnSequenceArmed) sendFromDoubleReturn();
+        else returnSequenceArmed=true;
       });
 
       /* ---------- Paste Event Handling ---------- */
@@ -578,6 +604,7 @@ Tone – Supportive, precise, no judgmental language.`;
         }
 
         userArea.value='';
+        previousUserAreaValue='';
         userArea.focus();
         userArea.setSelectionRange(0,0);
         // Display the message without the command
