@@ -2,22 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"/>
   <title>Refine / Translate Chat</title>
   <style>
     *,*::before,*::after{box-sizing:border-box}
-    html{height:100%}
-    body{margin:0;padding:0;font-family:Arial,sans-serif;line-height:1.4;
-         height:100vh;height:var(--app-h,100dvh);
-         display:flex;flex-direction:column;overflow:hidden}
-    #chat-container{max-width:600px;width:100%;margin:0 auto;padding:10px 0 0;position:relative;
-                    flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-    #hamburgerMenu{font-size:1.5rem;cursor:pointer}
+    :root{--app-height:100vh;--app-top:0px}
+    @supports(height:100dvh){:root{--app-height:100dvh}}
+    html,body{height:100%;margin:0;padding:0;font-family:Arial,sans-serif;line-height:1.4;overflow:hidden}
+    body{position:fixed;top:var(--app-top);left:0;width:100%;height:var(--app-height);display:flex;flex-direction:column}
+    #chat-container{width:100%;max-width:600px;min-height:0;flex:1 1 auto;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 12px 0;position:relative;display:flex;flex-direction:column}
+    #hamburgerMenu{font-size:1.5rem;cursor:pointer;margin-bottom:10px}
     #apiKeyWrapper,#endpointWrapper,#serviceSelectWrapper,#modelSelectWrapper{display:none;margin-bottom:15px}
-    #chatMessages{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
-                  padding:10px;border:1px solid #ccc;border-radius:4px;word-wrap:break-word;
-                  overscroll-behavior:contain}
-    #inputWrapper{flex:0 0 auto;width:100%;max-width:600px;margin:0 auto;background:#fff;padding:10px 20px;box-shadow:0 -2px 5px rgba(0,0,0,.1)}
+    #chatMessages{height:auto;min-height:0;flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:10px;border:1px solid #ccc;border-radius:4px;word-wrap:break-word}
+    #inputWrapper{position:static;flex:0 0 auto;width:100%;max-width:600px;margin:0 auto;background:#fff;padding:10px 20px max(10px,env(safe-area-inset-bottom));box-shadow:0 -2px 5px rgba(0,0,0,.1)}
     #userMessage{width:100%;height:100px;resize:none;padding:10px;font-size:1rem;border:1px solid #ccc;border-radius:4px;margin-bottom:8px}
     .controls{display:flex;gap:8px}
     .controls button{flex:1 1 100px;padding:10px;font-size:1rem;cursor:pointer}
@@ -95,17 +92,19 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
 
-      /* ---------- real visible height (iOS Safari toolbars + keyboard) ---------- */
-      function setAppHeight(){
-        const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-        document.documentElement.style.setProperty('--app-h', h + 'px');
+      /* ---------- iPhone / mobile keyboard viewport ---------- */
+      function syncAppViewport(){
+        const viewport=window.visualViewport;
+        const height=viewport?viewport.height:window.innerHeight;
+        const top=viewport?viewport.offsetTop:0;
+        document.documentElement.style.setProperty('--app-height',`${Math.round(height)}px`);
+        document.documentElement.style.setProperty('--app-top',`${Math.round(top)}px`);
       }
-      setAppHeight();
-      window.addEventListener('resize', setAppHeight);
-      window.addEventListener('orientationchange', () => setTimeout(setAppHeight, 250));
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', setAppHeight);
-        window.visualViewport.addEventListener('scroll', setAppHeight);
+      syncAppViewport();
+      window.addEventListener('resize',syncAppViewport);
+      if(window.visualViewport){
+        window.visualViewport.addEventListener('resize',syncAppViewport);
+        window.visualViewport.addEventListener('scroll',syncAppViewport);
       }
 
       /* ---------- slash-command helpers ---------- */
@@ -302,18 +301,10 @@ Tone – Supportive, precise, no judgmental language.`;
         const newestMessage=chatMessages.lastElementChild;
         requestAnimationFrame(()=>{
           if(showFromStart&&newestMessage){
-            /* Reserve enough space below the last message so its FIRST line
-               can always be scrolled up to the top of the visible area,
-               even when the reply is shorter than the viewport. */
-            const pad=Math.max(10,chatMessages.clientHeight-newestMessage.offsetHeight-16);
-            chatMessages.style.paddingBottom=pad+'px';
-            requestAnimationFrame(()=>{
-              const messageTop=newestMessage.getBoundingClientRect().top;
-              const chatTop=chatMessages.getBoundingClientRect().top;
-              chatMessages.scrollTop+=messageTop-chatTop-8;
-            });
+            const messageTop=newestMessage.getBoundingClientRect().top;
+            const chatTop=chatMessages.getBoundingClientRect().top;
+            chatMessages.scrollTop+=messageTop-chatTop-10;
           }else{
-            chatMessages.style.paddingBottom='10px';
             chatMessages.scrollTop=chatMessages.scrollHeight;
           }
         });
@@ -323,7 +314,6 @@ Tone – Supportive, precise, no judgmental language.`;
       clearBtn.addEventListener('click',()=>{
         chatMessages.innerHTML='';
         conversation.splice(1);
-        chatMessages.style.paddingBottom='10px';
         chatMessages.scrollTop=0;
         userArea.value = ''; // Clear the input field
       });
