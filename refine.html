@@ -2,19 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Refine / Translate Chat</title>
   <style>
     *,*::before,*::after{box-sizing:border-box}
-    :root{--app-height:100vh;--app-top:0px}
-    @supports(height:100dvh){:root{--app-height:100dvh}}
-    html,body{height:100%;margin:0;padding:0;font-family:Arial,sans-serif;line-height:1.4;overflow:hidden}
-    body{position:fixed;top:var(--app-top);left:0;width:100%;height:var(--app-height);display:flex;flex-direction:column}
-    #chat-container{width:100%;max-width:600px;min-height:0;flex:1 1 auto;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 12px 0;position:relative;display:flex;flex-direction:column}
+    html,body{height:100%;margin:0;padding:0;font-family:Arial,sans-serif;line-height:1.4}
+    #chat-container{max-width:600px;margin:0 auto;padding:20px 0;position:relative}
     #hamburgerMenu{font-size:1.5rem;cursor:pointer;margin-bottom:10px}
     #apiKeyWrapper,#endpointWrapper,#serviceSelectWrapper,#modelSelectWrapper{display:none;margin-bottom:15px}
-    #chatMessages{height:auto;min-height:0;flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:10px;border:1px solid #ccc;border-radius:4px;word-wrap:break-word}
-    #inputWrapper{position:static;flex:0 0 auto;width:100%;max-width:600px;margin:0 auto;background:#fff;padding:10px 20px max(10px,env(safe-area-inset-bottom));box-shadow:0 -2px 5px rgba(0,0,0,.1)}
+    #chatMessages{height:calc(100vh - 180px);overflow-y:auto;padding:10px;border:1px solid #ccc;border-radius:4px;word-wrap:break-word;padding-bottom:140px}
+    #inputWrapper{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;background:#fff;padding:10px 20px;box-shadow:0 -2px 5px rgba(0,0,0,.1)}
     #userMessage{width:100%;height:100px;resize:none;padding:10px;font-size:1rem;border:1px solid #ccc;border-radius:4px;margin-bottom:8px}
     .controls{display:flex;gap:8px}
     .controls button{flex:1 1 100px;padding:10px;font-size:1rem;cursor:pointer}
@@ -91,21 +88,6 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-
-      /* ---------- iPhone / mobile keyboard viewport ---------- */
-      function syncAppViewport(){
-        const viewport=window.visualViewport;
-        const height=viewport?viewport.height:window.innerHeight;
-        const top=viewport?viewport.offsetTop:0;
-        document.documentElement.style.setProperty('--app-height',`${Math.round(height)}px`);
-        document.documentElement.style.setProperty('--app-top',`${Math.round(top)}px`);
-      }
-      syncAppViewport();
-      window.addEventListener('resize',syncAppViewport);
-      if(window.visualViewport){
-        window.visualViewport.addEventListener('resize',syncAppViewport);
-        window.visualViewport.addEventListener('scroll',syncAppViewport);
-      }
 
       /* ---------- slash-command helpers ---------- */
       const COMMANDS = ['/translate', '/refine', '/explain', '/reply', '/reject', '/similar', '/orafy', '/intentReply', '/evaluate'];
@@ -329,64 +311,20 @@ Tone – Supportive, precise, no judgmental language.`;
         },ms);
       }
 
-      async function copyTextToClipboard(text){
-        if(navigator.clipboard&&navigator.clipboard.writeText){
-          try{
-            await navigator.clipboard.writeText(text);
-            return true;
-          }catch{
-            // Fall back for browsers that restrict the Clipboard API.
-          }
-        }
-        const activeElement=document.activeElement;
-        const selectionStart=activeElement&&typeof activeElement.selectionStart==='number'?activeElement.selectionStart:null;
-        const selectionEnd=activeElement&&typeof activeElement.selectionEnd==='number'?activeElement.selectionEnd:null;
-        const helper=document.createElement('textarea');
-        helper.value=text;
-        helper.setAttribute('readonly','');
-        helper.style.cssText='position:fixed;left:-9999px;top:0;opacity:0';
-        document.body.appendChild(helper);
-        helper.select();
-        let copied=false;
-        try{ copied=document.execCommand('copy'); }catch{ copied=false; }
-        helper.remove();
-        if(activeElement&&typeof activeElement.focus==='function'){
-          try{ activeElement.focus({preventScroll:true}); }catch{ activeElement.focus(); }
-          if(selectionStart!==null&&typeof activeElement.setSelectionRange==='function'){
-            activeElement.setSelectionRange(selectionStart,selectionEnd);
-          }
-        }
-        return copied;
-      }
-
-      function beginAutomaticClipboardWrite(){
-        if(!navigator.clipboard||!navigator.clipboard.write||typeof ClipboardItem==='undefined') return null;
-        let resolveText;
-        let rejectText;
-        const textPromise=new Promise((resolve,reject)=>{
-          resolveText=resolve;
-          rejectText=reject;
-        });
-        try{
-          const item=new ClipboardItem({
-            'text/plain':textPromise.then(text=>new Blob([text],{type:'text/plain'}))
-          });
-          const result=navigator.clipboard.write([item]).then(()=>true).catch(()=>false);
-          return {resolve:resolveText,reject:rejectText,result};
-        }catch{
-          return null;
-        }
-      }
-
       /* ---------- copy last ---------- */
-      copyBtn.addEventListener('click',async()=>{
+      copyBtn.addEventListener('click',()=>{
         const bots=chatMessages.querySelectorAll('.message.bot');
         if(!bots.length) return autoAlert('No reply to copy.');
         const raw=bots[bots.length-1].innerText.replace(/^[^:]+:\s*/,'').trimEnd();
         const previewLen=120;
         const preview=raw.length>previewLen?raw.slice(0,previewLen)+'…':raw;
-        const copied=await copyTextToClipboard(raw);
-        autoAlert(copied?`Copied:\n${preview}`:'Clipboard access was blocked.');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(raw)
+            .then(()=>autoAlert(`Copied:\n${preview}`))
+            .catch(() => {
+              // Fail silently
+            });
+        }
       });
 
       /* ---------- double-click to copy ---------- */
@@ -407,14 +345,10 @@ Tone – Supportive, precise, no judgmental language.`;
       });
 
       /* ---------- Ctrl/Cmd+Enter or two consecutive Returns ---------- */
-      let preserveNextLineBreak=false;
-      let ignoreNextDoubleReturnCheck=false;
       userArea.addEventListener('keydown', e => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
           e.preventDefault();
           sendBtn.click();
-        } else if(e.key==='Enter'&&e.shiftKey){
-          preserveNextLineBreak=true;
         } else if (
           e.key === 'Enter' &&
           !e.shiftKey &&
@@ -428,43 +362,9 @@ Tone – Supportive, precise, no judgmental language.`;
         }
       });
 
-      function isLineBreakInput(e){
-        return e.inputType==='insertLineBreak'||e.inputType==='insertParagraph';
-      }
-      userArea.addEventListener('beforeinput',e=>{
-        if(!isLineBreakInput(e)||preserveNextLineBreak) return;
-        const caret=userArea.selectionStart;
-        if(
-          caret===userArea.selectionEnd&&
-          caret>0&&
-          userArea.value[caret-1]==='\n'
-        ){
-          e.preventDefault();
-          sendBtn.click();
-        }
-      });
-      userArea.addEventListener('input',e=>{
-        if(preserveNextLineBreak){
-          preserveNextLineBreak=false;
-          return;
-        }
-        if(ignoreNextDoubleReturnCheck||e.inputType==='insertFromPaste'){
-          ignoreNextDoubleReturnCheck=false;
-          return;
-        }
-        const caret=userArea.selectionStart;
-        if(
-          caret===userArea.selectionEnd&&
-          caret>1&&
-          userArea.value.slice(caret-2,caret)==='\n\n'
-        ) sendBtn.click();
-      });
-
       /* ---------- Paste Event Handling ---------- */
       userArea.addEventListener('paste', e => {
         // Prevent any automatic send action on paste
-        ignoreNextDoubleReturnCheck=true;
-        setTimeout(()=>{ ignoreNextDoubleReturnCheck=false; },0);
         e.stopPropagation();
       });
 
@@ -650,8 +550,6 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           messagesForApi=conversation;
         }
 
-        // Start during the user's Send/Return gesture so iPhone Safari permits it.
-        const automaticClipboardWrite=beginAutomaticClipboardWrite();
         try{
           const headers={'Content-Type':'application/json'};
           if(!usesManagedEndpoint) headers.Authorization=`Bearer ${key}`;
@@ -682,15 +580,7 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           }
 
           appendAndScroll(`<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`,true);
-          let copied=false;
-          if(automaticClipboardWrite){
-            automaticClipboardWrite.resolve(reply);
-            copied=await automaticClipboardWrite.result;
-          }
-          if(!copied) copied=await copyTextToClipboard(reply);
-          autoAlert(copied?'Response copied to clipboard.':'Automatic copy was blocked. Tap Copy.');
         }catch(e){
-          if(automaticClipboardWrite) automaticClipboardWrite.reject(e);
           appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`,true);
         }
       });
