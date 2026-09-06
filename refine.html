@@ -2,16 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"/>
   <title>Refine / Translate Chat</title>
   <style>
     *,*::before,*::after{box-sizing:border-box}
-    html,body{height:100%;margin:0;padding:0;font-family:Arial,sans-serif;line-height:1.4}
-    #chat-container{max-width:600px;margin:0 auto;padding:20px 0;position:relative}
+    :root{--app-height:100vh;--app-top:0px}
+    @supports(height:100dvh){:root{--app-height:100dvh}}
+    html,body{height:100%;margin:0;padding:0;font-family:Arial,sans-serif;line-height:1.4;overflow:hidden}
+    body{position:fixed;top:var(--app-top);left:0;width:100%;height:var(--app-height);display:flex;flex-direction:column}
+    #chat-container{width:100%;max-width:600px;min-height:0;flex:1 1 auto;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 12px 0;position:relative;display:flex;flex-direction:column}
     #hamburgerMenu{font-size:1.5rem;cursor:pointer;margin-bottom:10px}
     #apiKeyWrapper,#endpointWrapper,#serviceSelectWrapper,#modelSelectWrapper{display:none;margin-bottom:15px}
-    #chatMessages{height:calc(100vh - 180px);overflow-y:auto;padding:10px;border:1px solid #ccc;border-radius:4px;word-wrap:break-word;padding-bottom:140px}
-    #inputWrapper{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;background:#fff;padding:10px 20px;box-shadow:0 -2px 5px rgba(0,0,0,.1)}
+    #chatMessages{height:auto;min-height:0;flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:10px;border:1px solid #ccc;border-radius:4px;word-wrap:break-word}
+    #inputWrapper{position:static;flex:0 0 auto;width:100%;max-width:600px;margin:0 auto;background:#fff;padding:10px 20px max(10px,env(safe-area-inset-bottom));box-shadow:0 -2px 5px rgba(0,0,0,.1)}
     #userMessage{width:100%;height:100px;resize:none;padding:10px;font-size:1rem;border:1px solid #ccc;border-radius:4px;margin-bottom:8px}
     .controls{display:flex;gap:8px}
     .controls button{flex:1 1 100px;padding:10px;font-size:1rem;cursor:pointer}
@@ -88,6 +91,22 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+
+      /* ---------- keep the app inside iPhone's visible viewport ---------- */
+      function syncAppViewport(){
+        const viewport=window.visualViewport;
+        const height=viewport?viewport.height:window.innerHeight;
+        const top=viewport?viewport.offsetTop:0;
+        document.documentElement.style.setProperty('--app-height',`${Math.round(height)}px`);
+        document.documentElement.style.setProperty('--app-top',`${Math.round(top)}px`);
+      }
+      syncAppViewport();
+      window.addEventListener('resize',syncAppViewport);
+      window.addEventListener('orientationchange',()=>setTimeout(syncAppViewport,250));
+      if(window.visualViewport){
+        window.visualViewport.addEventListener('resize',syncAppViewport);
+        window.visualViewport.addEventListener('scroll',syncAppViewport);
+      }
 
       /* ---------- slash-command helpers ---------- */
       const COMMANDS = ['/translate', '/refine', '/explain', '/reply', '/reject', '/similar', '/orafy', '/intentReply', '/evaluate'];
