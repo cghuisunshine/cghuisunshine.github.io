@@ -408,6 +408,7 @@ Tone – Supportive, precise, no judgmental language.`;
 
       /* ---------- Ctrl/Cmd+Enter or two consecutive Returns ---------- */
       let preserveNextLineBreak=false;
+      let ignoreNextDoubleReturnCheck=false;
       userArea.addEventListener('keydown', e => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
           e.preventDefault();
@@ -443,9 +444,12 @@ Tone – Supportive, precise, no judgmental language.`;
         }
       });
       userArea.addEventListener('input',e=>{
-        if(!isLineBreakInput(e)) return;
         if(preserveNextLineBreak){
           preserveNextLineBreak=false;
+          return;
+        }
+        if(ignoreNextDoubleReturnCheck||e.inputType==='insertFromPaste'){
+          ignoreNextDoubleReturnCheck=false;
           return;
         }
         const caret=userArea.selectionStart;
@@ -459,6 +463,8 @@ Tone – Supportive, precise, no judgmental language.`;
       /* ---------- Paste Event Handling ---------- */
       userArea.addEventListener('paste', e => {
         // Prevent any automatic send action on paste
+        ignoreNextDoubleReturnCheck=true;
+        setTimeout(()=>{ ignoreNextDoubleReturnCheck=false; },0);
         e.stopPropagation();
       });
 
