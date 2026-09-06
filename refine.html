@@ -408,10 +408,14 @@ Tone – Supportive, precise, no judgmental language.`;
       });
 
       /* ---------- Ctrl/Cmd+Enter or two consecutive Returns ---------- */
+      let preserveNextLineBreak=false;
+      let ignoreNextDoubleReturnCheck=false;
       userArea.addEventListener('keydown', e => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
           e.preventDefault();
           sendBtn.click();
+        } else if(e.key==='Enter'&&e.shiftKey){
+          preserveNextLineBreak=true;
         } else if (
           e.key === 'Enter' &&
           !e.shiftKey &&
@@ -425,9 +429,43 @@ Tone – Supportive, precise, no judgmental language.`;
         }
       });
 
+      function isLineBreakInput(e){
+        return e.inputType==='insertLineBreak'||e.inputType==='insertParagraph';
+      }
+      userArea.addEventListener('beforeinput',e=>{
+        if(!isLineBreakInput(e)||preserveNextLineBreak||e.isComposing) return;
+        const caret=userArea.selectionStart;
+        if(
+          caret===userArea.selectionEnd&&
+          caret>0&&
+          userArea.value[caret-1]==='\n'
+        ){
+          e.preventDefault();
+          sendBtn.click();
+        }
+      });
+      userArea.addEventListener('input',e=>{
+        if(preserveNextLineBreak){
+          preserveNextLineBreak=false;
+          return;
+        }
+        if(e.isComposing||ignoreNextDoubleReturnCheck||e.inputType==='insertFromPaste'){
+          ignoreNextDoubleReturnCheck=false;
+          return;
+        }
+        const caret=userArea.selectionStart;
+        if(
+          caret===userArea.selectionEnd&&
+          caret>1&&
+          userArea.value.slice(caret-2,caret)==='\n\n'
+        ) sendBtn.click();
+      });
+
       /* ---------- Paste Event Handling ---------- */
       userArea.addEventListener('paste', e => {
         // Prevent any automatic send action on paste
+        ignoreNextDoubleReturnCheck=true;
+        setTimeout(()=>{ ignoreNextDoubleReturnCheck=false; },0);
         e.stopPropagation();
       });
 
