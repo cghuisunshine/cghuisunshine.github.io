@@ -330,20 +330,64 @@ Tone – Supportive, precise, no judgmental language.`;
         },ms);
       }
 
+      async function copyTextToClipboard(text){
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+          try{
+            await navigator.clipboard.writeText(text);
+            return true;
+          }catch{
+            // Fall back for browsers that restrict the Clipboard API.
+          }
+        }
+        const activeElement=document.activeElement;
+        const selectionStart=activeElement&&typeof activeElement.selectionStart==='number'?activeElement.selectionStart:null;
+        const selectionEnd=activeElement&&typeof activeElement.selectionEnd==='number'?activeElement.selectionEnd:null;
+        const helper=document.createElement('textarea');
+        helper.value=text;
+        helper.setAttribute('readonly','');
+        helper.style.cssText='position:fixed;left:-9999px;top:0;opacity:0';
+        document.body.appendChild(helper);
+        helper.select();
+        let copied=false;
+        try{ copied=document.execCommand('copy'); }catch{ copied=false; }
+        helper.remove();
+        if(activeElement&&typeof activeElement.focus==='function'){
+          try{ activeElement.focus({preventScroll:true}); }catch{ activeElement.focus(); }
+          if(selectionStart!==null&&typeof activeElement.setSelectionRange==='function'){
+            activeElement.setSelectionRange(selectionStart,selectionEnd);
+          }
+        }
+        return copied;
+      }
+
+      function beginAutomaticClipboardWrite(){
+        if(!navigator.clipboard||!navigator.clipboard.write||typeof ClipboardItem==='undefined') return null;
+        let resolveText;
+        let rejectText;
+        const textPromise=new Promise((resolve,reject)=>{
+          resolveText=resolve;
+          rejectText=reject;
+        });
+        try{
+          const item=new ClipboardItem({
+            'text/plain':textPromise.then(text=>new Blob([text],{type:'text/plain'}))
+          });
+          const result=navigator.clipboard.write([item]).then(()=>true).catch(()=>false);
+          return {resolve:resolveText,reject:rejectText,result};
+        }catch{
+          return null;
+        }
+      }
+
       /* ---------- copy last ---------- */
-      copyBtn.addEventListener('click',()=>{
+      copyBtn.addEventListener('click',async()=>{
         const bots=chatMessages.querySelectorAll('.message.bot');
         if(!bots.length) return autoAlert('No reply to copy.');
         const raw=bots[bots.length-1].innerText.replace(/^[^:]+:\s*/,'').trimEnd();
         const previewLen=120;
         const preview=raw.length>previewLen?raw.slice(0,previewLen)+'…':raw;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(raw)
-            .then(()=>autoAlert(`Copied:\n${preview}`))
-            .catch(() => {
-              // Fail silently
-            });
-        }
+        const copied=await copyTextToClipboard(raw);
+        autoAlert(copied?`Copied:\n${preview}`:'Clipboard access was blocked.');
       });
 
       /* ---------- double-click to copy ---------- */
@@ -569,6 +613,9 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           messagesForApi=conversation;
         }
 
+        // Begin the write while the Send gesture is active. Safari allows the
+        // clipboard item to receive its text later, after the request finishes.
+        const automaticClipboardWrite=beginAutomaticClipboardWrite();
         try{
           const headers={'Content-Type':'application/json'};
           if(!usesManagedEndpoint) headers.Authorization=`Bearer ${key}`;
@@ -599,7 +646,15 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
           }
 
           appendAndScroll(`<div class="message bot">${serviceDisplay[svc]}: ${formatMessage(reply)}</div>`,true);
+          let copied=false;
+          if(automaticClipboardWrite){
+            automaticClipboardWrite.resolve(reply);
+            copied=await automaticClipboardWrite.result;
+          }
+          if(!copied) copied=await copyTextToClipboard(reply);
+          autoAlert(copied?'Response copied to clipboard.':'Automatic copy was blocked. Tap Copy.');
         }catch(e){
+          if(automaticClipboardWrite) automaticClipboardWrite.reject(e);
           appendAndScroll(`<div class="message bot">Error: ${e.message}</div>`,true);
         }
       });
