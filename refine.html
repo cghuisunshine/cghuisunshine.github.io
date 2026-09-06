@@ -540,8 +540,15 @@ Tone – Supportive, precise, no judgmental language.`;
         }
 
         userArea.value='';
-        userArea.focus();
-        userArea.setSelectionRange(0,0);
+        const hasTouchInput=navigator.maxTouchPoints>0||
+          (window.matchMedia&&window.matchMedia('(pointer: coarse)').matches);
+        if(hasTouchInput){
+          userArea.blur();
+          setTimeout(syncAppViewport,50);
+        }else{
+          userArea.focus();
+          userArea.setSelectionRange(0,0);
+        }
         // Display the message without the command
         const displayInput = cmdInfo ? cmdInfo.body : rawInput;
         appendAndScroll(`<div class="message user">You: ${displayInput}</div>`);
