@@ -661,7 +661,7 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
 
       /* ---------- slash autocomplete ---------- */
       const acBox=document.createElement('div');
-      acBox.style.cssText=`position:absolute;z-index:9999;background:#fff;border:1px solid #ccc;border-radius:4px;font:14px/1.4 system-ui,sans-serif;display:none`;
+      acBox.style.cssText=`position:fixed;z-index:9999;background:#fff;border:1px solid #ccc;border-radius:4px;font:14px/1.4 system-ui,sans-serif;display:none;max-width:calc(100vw - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain`;
       acBox.onclick=e=>{if(e.target.dataset.cmd) insertCmd(e.target.dataset.cmd);};
       document.body.append(acBox);
 
@@ -676,11 +676,42 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
         userArea.focus();
         hideAC();
       }
+
+      function positionAC(){
+        const rect=userArea.getBoundingClientRect();
+        const viewport=window.visualViewport;
+        const viewportTop=viewport?viewport.offsetTop:0;
+        const viewportLeft=viewport?viewport.offsetLeft:0;
+        const viewportHeight=viewport?viewport.height:window.innerHeight;
+        const viewportWidth=viewport?viewport.width:window.innerWidth;
+        const margin=8;
+        const gap=4;
+        const topBoundary=viewportTop+margin;
+        const bottomBoundary=viewportTop+viewportHeight-margin;
+        const leftBoundary=viewportLeft+margin;
+        const rightBoundary=viewportLeft+viewportWidth-margin;
+
+        acBox.style.maxHeight='none';
+        acBox.style.left='0px';
+        acBox.style.top='0px';
+        const naturalHeight=acBox.scrollHeight;
+        const naturalWidth=acBox.offsetWidth;
+        const spaceAbove=Math.max(0,rect.top-gap-topBoundary);
+        const spaceBelow=Math.max(0,bottomBoundary-rect.bottom-gap);
+        const placeAbove=spaceAbove>=Math.min(naturalHeight,120)||spaceAbove>=spaceBelow;
+        const availableHeight=placeAbove?spaceAbove:spaceBelow;
+        const menuHeight=Math.min(naturalHeight,availableHeight);
+        const menuWidth=Math.min(naturalWidth,rightBoundary-leftBoundary);
+        const desiredLeft=rect.left+6;
+        const left=Math.min(Math.max(desiredLeft,leftBoundary),rightBoundary-menuWidth);
+        const top=placeAbove?rect.top-gap-menuHeight:rect.bottom+gap;
+
+        acBox.style.maxHeight=`${Math.floor(availableHeight)}px`;
+        acBox.style.left=`${Math.round(left)}px`;
+        acBox.style.top=`${Math.round(top)}px`;
+      }
+
       function showAC(){
-        const {left, top, height} = userArea.getBoundingClientRect();
-        const scrollTop = window.scrollY || window.pageYOffset;
-        const isMobile = window.innerWidth <= 600; // Simple mobile detection based on viewport width
-        
         const currentAction = actionSelect.value;
         // 1) figure out what the user has actually typed after the slash/space
         const caretPos = userArea.selectionStart;
@@ -712,16 +743,19 @@ Preserve meaning, style, tone, and formatting, and **output only the translation
 
         // 3) render only the filtered list
         acBox.innerHTML = filtered.map(c => `<div data-cmd="${c}" style="padding:4px 8px;cursor:pointer">${c}${c === '/' + currentAction ? ' *' : ''}</div>`).join('');
-        acBox.style.left = (left + 6) + 'px';
-        if (isMobile) {
-          // On mobile, position it just above the textarea considering the keyboard might be up
-          acBox.style.top = (top + scrollTop - 10) + 'px'; // Adjust offset for better visibility
-        } else {
-          acBox.style.top = (top + scrollTop + 4) + 'px'; // Position at the input on desktop
-        }
         acBox.style.display = 'block';
+        positionAC();
       }
       const hideAC=()=>acBox.style.display='none';
+
+      function repositionAC(){
+        if(acBox.style.display==='block') requestAnimationFrame(positionAC);
+      }
+      window.addEventListener('resize',repositionAC);
+      if(window.visualViewport){
+        window.visualViewport.addEventListener('resize',repositionAC);
+        window.visualViewport.addEventListener('scroll',repositionAC);
+      }
 
       userArea.addEventListener('keydown', e => {
         if ((e.key === '/' || e.key === ' ') && userArea.selectionStart === 0) {
